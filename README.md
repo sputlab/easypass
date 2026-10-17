@@ -27,9 +27,10 @@ Developed with privacy and security as top priorities: **100% client-side execut
   - Options for word capitalization and appending numeric digits.
 
 ### 🛡️ Security & Cryptography
-- **Native Web Crypto API**: Uses `crypto.getRandomValues()` for cryptographically secure pseudo-random number generation (CSPRNG).
-- **Entropy & Complexity Calculation**: Live visual feedback showing password entropy in bits and classified strength (`Weak`, `Medium`, `Strong`, `Very Strong`).
-- **Encrypted Local History**: Stores recent passwords in `localStorage` encrypted using PBKDF2 derivation.
+- **Native Web Crypto API**: Uses `crypto.getRandomValues()` with cryptographic rejection sampling (`getSecureRandomInt`) for true zero-modulo-bias pseudo-random generation (CSPRNG).
+- **Accurate Entropy Calculation**: Real-time entropy computation based on character set pool size for passwords and dictionary power-of-two size for passphrases ($~8$ bits/word).
+- **Content Security Policy (CSP)**: Built-in strict CSP meta policy preventing cross-site scripting and external network leakage.
+- **Encrypted Local History**: Stores recent passwords in `localStorage` encrypted with PBKDF2 derivation and confirmation prompt before deletion.
 - **Ninja Mode (Privacy)**: Mask passwords on screen (`-webkit-text-security: disc`) to prevent shoulder-surfing in public environments.
 - **Zero Third-Party CDNs**: No external fonts, no external scripts, and no analytics calls.
 
@@ -37,14 +38,14 @@ Developed with privacy and security as top priorities: **100% client-side execut
 - **Ambiguous Character Filter**: Exclude confusing characters like `0/O`, `1/l/I`, `8/B`.
 - **Consecutive Character Filter**: Prevent repeated identical characters from appearing adjacently.
 - **Custom Character Exclusions**: Specify exact characters to exclude based on your company's password policy.
-- **Bilingual Interface**: Seamless instant toggle between Italian (**IT**) and English (**EN**).
-- **Dark / Light Theme**: Clean dark mode with OLED support and smooth contrast transitions.
-- **Haptic Feedback**: Optional tactile vibration upon generating passwords on supported mobile devices.
-- **Accessible & Responsive**: Optimized touch hitboxes, ARIA labels, and full responsiveness from mobile to 4K desktops.
+- **Bilingual Interface**: Seamless instant toggle between Italian (**IT**) and English (**EN**) with synchronized separator labels and HTML language tags.
+- **Dark / Light Theme**: Automatic OS preference detection (`prefers-color-scheme`) with manual toggle and OLED-friendly dark palette.
+- **Haptic & Audio Feedback**: Tactile vibration and clean synthesizer tone using a cached, leak-free AudioContext.
+- **Accessible & Responsive**: Keyboard shortcuts (`G` to regenerate, `Escape` to close modals, click/Enter on password box to copy), visible focus rings, ARIA live announcement, and safe area insets for iOS notches and dynamic islands.
 
 ### 📱 Progressive Web App (PWA)
 - Fully installable on iOS (Safari Add to Home Screen), Android (Chrome PWA prompt), macOS, Windows, and Linux.
-- Runs completely offline without an internet connection.
+- **Service Worker Offline Cache**: Built-in `sw.js` Cache-First service worker enabling 100% offline functionality.
 
 ---
 
@@ -79,7 +80,8 @@ EasyPass/
 ├── LICENSE                   # MIT License
 ├── logo.png                  # EasyPass primary logo
 ├── manifest.json             # PWA Web App Manifest
-└── README.md                 # Project documentation
+├── README.md                 # Project documentation
+└── sw.js                     # Offline Service Worker (PWA Cache-First)
 ```
 
 ---

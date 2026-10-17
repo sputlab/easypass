@@ -2,14 +2,34 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>EasyPass v2.0.0 by sputlab.com</title>
+    <meta name="description" content="EasyPass - Generatore di password e passphrase sicuro, veloce e incentrato sulla privacy. 100% client-side, zero tracciamento e crittografia nativa Web Crypto API.">
+    <meta name="author" content="Stefano Soranzio (Sputlab)">
+    <meta name="keywords" content="password generator, passphrase generator, security, pwa, offline, web crypto, privacy, sputlab">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
 
-    <!-- Favicon classica -->
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="EasyPass - Secure Password & Passphrase Generator">
+    <meta property="og:description" content="Fast, privacy-focused password & passphrase generator. 100% client-side, zero tracking, Web Crypto API.">
+    <meta property="og:image" content="icons/icon-512x512.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="EasyPass - Password Generator">
+    <meta name="twitter:description" content="Fast, privacy-focused password & passphrase generator. 100% client-side.">
+    <meta name="twitter:image" content="icons/icon-192x192.png">
+
+    <!-- Favicon classica e PNG -->
     <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="favicon/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="favicon/favicon-64x64.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="favicon/favicon-128x128.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon/favicon-256x256.png">
 
     <!-- Manifest per Android e browser moderni -->
     <link rel="manifest" href="manifest.json">
@@ -20,7 +40,9 @@
     <meta name="apple-mobile-web-app-title" content="EasyPass">
 
     <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
 
     <meta name="theme-color" content="#2563eb">
 
@@ -102,13 +124,18 @@
       body {
         background: var(--bg);
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
-        padding: 16px;
+        font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         color: var(--text);
         transition: background 0.3s, color 0.3s;
+      }
+      button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
       }
       .container {
         width: 100%;
@@ -263,10 +290,14 @@
         transition: 0.25s;
         gap: 6px;
         min-height: 52px;
+        cursor: pointer;
+      }
+      .password-display:hover {
+        border-color: var(--accent);
       }
       .password-text {
         flex: 1;
-        font-family: 'Fira Code', monospace;
+        font-family: 'Fira Code', 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, Monaco, monospace;
         font-size: 1.2rem;
         letter-spacing: 0.6px;
         word-break: break-all;
@@ -741,7 +772,7 @@
         <!-- Classic Password Panel -->
         <div class="panel-classic panel-active" id="panelClassic">
           <div class="password-section">
-            <div class="password-display">
+            <div class="password-display" id="passwordBoxClassic" title="Clicca per copiare" aria-live="polite" role="button" tabindex="0" aria-label="Generated password. Click to copy">
               <div class="password-text placeholder" id="passwordTextClassic" data-i18n="pwPlaceholder">La tua password apparirà qui</div>
               <button class="btn-copy" id="btnCopyClassic" disabled="disabled" aria-label="Copy to clipboard">📋<span class="tooltip-copy" data-i18n="copied">Copiato!</span></button>
             </div>
@@ -794,7 +825,7 @@
         <!-- Passphrase Panel -->
         <div class="panel-passphrase" id="panelPassphrase">
           <div class="password-section">
-            <div class="password-display">
+            <div class="password-display" id="passwordBoxPass" title="Clicca per copiare" aria-live="polite" role="button" tabindex="0" aria-label="Generated passphrase. Click to copy">
               <div class="password-text placeholder" id="passwordTextPass" style="color:var(--passphrase-text-color);" data-i18n="ppPlaceholder">La tua passphrase apparirà qui</div>
               <button class="btn-copy" id="btnCopyPass" disabled="disabled" aria-label="Copy to clipboard">📋<span class="tooltip-copy" data-i18n="copied">Copiato!</span></button>
             </div>
@@ -814,7 +845,7 @@
               <label data-i18n="wordCount">Numero di parole</label>
               <span class="length-value" id="wordCountDisplay">4</span>
             </div>
-            <input type="range" class="range-slider" id="wordCountSlider" min="3" max="8" value="4" step="1" aria-label="Slider for word count">
+            <input type="range" class="range-slider" id="wordCountSlider" min="3" max="10" value="4" step="1" aria-label="Slider for word count">
           </div>
           
           <div class="toggles-section">
@@ -839,13 +870,13 @@
           <label style="display:flex; align-items:center; gap:8px; color:var(--text); font-size:0.95rem; margin-bottom:8px;">
             <span data-i18n="separator">Separatore:</span>
             <select id="separatorSelect" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);padding:10px;border-radius:8px;flex:1;min-height:44px;" aria-label="Select separator">
-              <option value="-">- (trattino)</option>
-              <option value=".">. (punto)</option>
-              <option value="_">_ (underscore)</option>
-              <option value=":">: (due punti)</option>
-              <option value=";">; (punto e virgola)</option>
-              <option value=",">, (virgola)</option>
-              <option value=" " data-i18n="space">Spazio</option>
+              <option value="-" data-i18n="sepHyphen">- (trattino)</option>
+              <option value="." data-i18n="sepDot">. (punto)</option>
+              <option value="_" data-i18n="sepUnderscore">_ (underscore)</option>
+              <option value=":" data-i18n="sepColon">: (due punti)</option>
+              <option value=";" data-i18n="sepSemicolon">; (punto e virgola)</option>
+              <option value="," data-i18n="sepComma">, (virgola)</option>
+              <option value=" " data-i18n="sepSpace">Spazio</option>
             </select>
           </label>
           <div class="error-msg" id="errorMsgPass"></div>
@@ -941,7 +972,7 @@
     <!-- Confirm Action Modal (Replaces JS confirm()) -->
     <div class="modal-overlay" id="confirmModal">
       <div class="modal-content">
-        <h3 id="confirmModalTitle">Conferma</h3>
+        <h3 id="confirmModalTitle" data-i18n="confirmTitle">Conferma</h3>
         <p id="confirmModalText" style="margin-bottom:16px;">Sei sicuro?</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn-modal" id="confirmModalYes" data-i18n="btnYes">Sì</button>
@@ -966,6 +997,8 @@
             pwPlaceholder: "La tua password apparirà qui",
             ppPlaceholder: "La tua passphrase apparirà qui",
             copied: "Copiato!",
+            clickToCopy: "Clicca per copiare",
+            shortcutTip: "Premi 'G' per rigenerare",
             btnGeneratePw: "Genera Password",
             btnGeneratePp: "Genera Passphrase",
             totalLength: "Lunghezza totale",
@@ -976,7 +1009,13 @@
             includeNumbers: "Includi numeri",
             capitalize: "Maiuscole iniziali",
             separator: "Separatore:",
-            space: "Spazio",
+            sepHyphen: "- (trattino)",
+            sepDot: ". (punto)",
+            sepUnderscore: "_ (trattino basso)",
+            sepColon: ": (due punti)",
+            sepSemicolon: "; (punto e virgola)",
+            sepComma: ", (virgola)",
+            sepSpace: "Spazio",
             aboutDesc: "Generatore di password e passphrase con tutte le caratteristiche per la massima sicurezza e personalizzazione.",
             aboutF1: "Password classica con lunghezza e set configurabili",
             aboutF2: "Passphrase a parole casuali con separatore",
@@ -994,6 +1033,8 @@
             btnClose: "Chiudi",
             historyTitle: "📋 Cronologia ultime password",
             btnDeleteHistory: "Elimina cronologia",
+            confirmTitle: "Conferma",
+            confirmDeleteHistory: "Eliminare definitivamente la cronologia delle password?",
             settingsTitle: "⚙️ Impostazioni",
             darkTheme: "🌙 Tema scuro",
             ninjaMode: "🕶️ Modalità Ninja",
@@ -1030,6 +1071,8 @@
             pwPlaceholder: "Your password will appear here",
             ppPlaceholder: "Your passphrase will appear here",
             copied: "Copied!",
+            clickToCopy: "Click to copy",
+            shortcutTip: "Press 'G' to regenerate",
             btnGeneratePw: "Generate Password",
             btnGeneratePp: "Generate Passphrase",
             totalLength: "Total length",
@@ -1040,7 +1083,13 @@
             includeNumbers: "Include numbers",
             capitalize: "Capitalize first letters",
             separator: "Separator:",
-            space: "Space",
+            sepHyphen: "- (hyphen)",
+            sepDot: ". (dot)",
+            sepUnderscore: "_ (underscore)",
+            sepColon: ": (colon)",
+            sepSemicolon: "; (semicolon)",
+            sepComma: ", (comma)",
+            sepSpace: "Space",
             aboutDesc: "Password and passphrase generator with all features for maximum security and customization.",
             aboutF1: "Classic password with configurable length and sets",
             aboutF2: "Random words passphrase with separator",
@@ -1058,6 +1107,8 @@
             btnClose: "Close",
             historyTitle: "📋 Recent password history",
             btnDeleteHistory: "Clear history",
+            confirmTitle: "Confirmation",
+            confirmDeleteHistory: "Permanently delete recent password history?",
             settingsTitle: "⚙️ Settings",
             darkTheme: "🌙 Dark theme",
             ninjaMode: "🕶️ Ninja Mode",
@@ -1088,6 +1139,7 @@
 
         function setLanguage(lang) {
           currentLang = lang;
+          document.documentElement.lang = lang;
           localStorage.setItem('easypass_lang', lang);
           const t = i18nDict[lang];
           
@@ -1096,16 +1148,20 @@
             if (t[key]) el.textContent = t[key];
           });
           
-          // Placeholders updates
+          // Placeholders & titles updates
           document.getElementById('excludeCharsClassic').placeholder = t.excludeCharsPlaceholder;
+          const boxClassic = document.getElementById('passwordBoxClassic');
+          const boxPass = document.getElementById('passwordBoxPass');
+          if (boxClassic) boxClassic.title = t.clickToCopy;
+          if (boxPass) boxPass.title = t.clickToCopy;
           
           // Re-render toggles for translation
           createToggleRows();
           applyConfig();
           
           // Re-evaluate strength strings if any generated
-          if(classicPassword) updateStrengthAndEntropy(classicPassword, strengthBarClassic, strengthLabelClassic, entropyClassic);
-          if(passphraseValue) updateStrengthAndEntropy(passphraseValue, document.getElementById('strengthBarPass'), document.getElementById('strengthLabelPass'), document.getElementById('entropyPass'));
+          if (classicPassword) updateStrengthAndEntropy(classicPassword, strengthBarClassic, strengthLabelClassic, entropyClassic, false);
+          if (passphraseValue) updateStrengthAndEntropy(passphraseValue, document.getElementById('strengthBarPass'), document.getElementById('strengthLabelPass'), document.getElementById('entropyPass'), true);
           
           document.getElementById('currentLangDisplay').textContent = lang === 'it' ? 'Cambia in EN' : 'Switch to IT';
         }
@@ -1118,7 +1174,9 @@
         // ====== TEMA ======
         const body = document.body;
         const themeKey = 'easypass_theme_v2';
-        let currentTheme = localStorage.getItem(themeKey) || 'dark';
+        const savedTheme = localStorage.getItem(themeKey);
+        const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
         function setTheme(t) {
           currentTheme = t;
           body.classList.toggle('theme-light', t === 'light');
@@ -1128,12 +1186,30 @@
         }
         setTheme(currentTheme);
 
-        // ====== SECURITY: SECURE RANDOM UTILITY ======
-        function getSecureRandom() {
-          // Returns a float [0, 1) cryptographically secure
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem(themeKey)) {
+              setTheme(e.matches ? 'dark' : 'light');
+            }
+          });
+        }
+
+        // ====== SECURITY: ZERO-MODULO-BIAS SECURE RANDOM UTILITIES ======
+        function getSecureRandomInt(max) {
+          if (max <= 1) return 0;
+          const maxUint = 0xFFFFFFFF;
+          const limit = maxUint - (maxUint % max);
           const array = new Uint32Array(1);
-          window.crypto.getRandomValues(array);
-          return array[0] / (0xFFFFFFFF + 1);
+          let val;
+          do {
+            window.crypto.getRandomValues(array);
+            val = array[0];
+          } while (val >= limit);
+          return val % max;
+        }
+
+        function getSecureRandom() {
+          return getSecureRandomInt(0x10000000) / 0x10000000;
         }
 
         // ====== RIFERIMENTI DOM ======
@@ -1363,13 +1439,13 @@
 
         function shuffle(arr) {
           for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(getSecureRandom() * (i + 1));
+            const j = getSecureRandomInt(i + 1);
             [arr[i], arr[j]] = [arr[j], arr[i]];
           }
           return arr;
         }
         function randomChar(charset) {
-          return charset[Math.floor(getSecureRandom() * charset.length)];
+          return charset[getSecureRandomInt(charset.length)];
         }
 
         function getActiveConfigs() {
@@ -1446,7 +1522,7 @@
                 if (i + 1 < work.length) forbidden.add(work[i + 1]);
                 const candidates = [...charset].filter(c => !forbidden.has(c));
                 if (candidates.length > 0) {
-                  work[i] = candidates[Math.floor(getSecureRandom() * candidates.length)];
+                  work[i] = candidates[getSecureRandomInt(candidates.length)];
                   changed = true;
                 } else {
                   if (i + 1 < work.length && work[i + 1] !== work[i]) {
@@ -1490,7 +1566,7 @@
           return result.join('');
         }
 
-        function updateStrengthAndEntropy(pw, bar, label, entropySpan) {
+        function updateStrengthAndEntropy(pw, bar, label, entropySpan, isPassphrase) {
           const t = i18nDict[currentLang];
           if (!pw) {
             bar.style.width = '0';
@@ -1498,26 +1574,42 @@
             entropySpan.textContent = '';
             return;
           }
-          const len = pw.length;
-          const types = [/[a-z]/.test(pw), /[A-Z]/.test(pw), /\d/.test(pw), /[^a-zA-Z0-9]/.test(pw)].filter(Boolean).length;
-          let lengthScore = len >= 20 ? 50 : len >= 16 ? 45 : len >= 12 ? 35 : len >= 8 ? 20 : len >= 6 ? 10 : 0;
-          const varietyScore = (types / 4) * 50;
-          let bonus = (len >= 16 && types === 4) ? 10 : (len >= 20 && types === 4) ? 15 : 0;
-          let score = Math.min(lengthScore + varietyScore + bonus, 100);
-          if (len < 8) score = Math.min(score, 40);
-          if (len < 6) score = Math.min(score, 25);
-          
+
+          let bits = 0;
+          let score = 0;
+
+          if (isPassphrase) {
+            const wordCount = parseInt(wordCountSlider.value) || 4;
+            // 256-word dictionary = exactly 8 bits per word
+            bits = wordCount * 8;
+            if (includeNumbersPass.checked) bits += Math.round(wordCount * Math.log2(100));
+            if (capitalizePass.checked) bits += wordCount;
+
+            score = Math.min(Math.round((bits / 64) * 100), 100);
+          } else {
+            const activePool = getActiveConfigs().map(c => getCharsetWithExclusions(c.chars)).join('');
+            const poolSize = activePool.length || Math.max(new Set(pw).size, 10);
+            bits = Math.round(pw.length * Math.log2(poolSize));
+
+            const len = pw.length;
+            const types = [/[a-z]/.test(pw), /[A-Z]/.test(pw), /\d/.test(pw), /[^a-zA-Z0-9]/.test(pw)].filter(Boolean).length;
+            let lengthScore = len >= 20 ? 50 : len >= 16 ? 45 : len >= 12 ? 35 : len >= 8 ? 20 : len >= 6 ? 10 : 0;
+            const varietyScore = (types / 4) * 50;
+            let bonus = (len >= 16 && types === 4) ? 10 : (len >= 20 && types === 4) ? 15 : 0;
+            score = Math.min(lengthScore + varietyScore + bonus, 100);
+            if (len < 8) score = Math.min(score, 40);
+            if (len < 6) score = Math.min(score, 25);
+          }
+
           let lvl, col;
-          if (score < 30) { lvl = t.weak; col = '#ef4444'; }
-          else if (score < 60) { lvl = t.medium; col = '#f59e0b'; }
-          else if (score < 80) { lvl = t.strong; col = '#22c55e'; }
+          if (score < 30 || bits < 32) { lvl = t.weak; col = '#ef4444'; }
+          else if (score < 60 || bits < 55) { lvl = t.medium; col = '#f59e0b'; }
+          else if (score < 85 || bits < 80) { lvl = t.strong; col = '#22c55e'; }
           else { lvl = t.veryStrong; col = '#10b981'; }
-          
+
           bar.style.width = score + '%';
           bar.style.backgroundColor = col;
           label.textContent = lvl;
-          const unique = new Set(pw).size;
-          const bits = Math.round(len * Math.log2(unique || 1));
           entropySpan.textContent = `~${bits} bit`;
         }
 
@@ -1532,7 +1624,7 @@
           }).join('');
           pwTextClassic.classList.remove('placeholder');
           btnCopyClassic.disabled = false;
-          updateStrengthAndEntropy(pw, strengthBarClassic, strengthLabelClassic, entropyClassic);
+          updateStrengthAndEntropy(pw, strengthBarClassic, strengthLabelClassic, entropyClassic, false);
           addToHistory(pw);
           if (config.ninja) applyNinja(pwTextClassic);
         }
@@ -1542,7 +1634,7 @@
           pwTextPass.textContent = pw;
           pwTextPass.classList.remove('placeholder');
           btnCopyPass.disabled = false;
-          updateStrengthAndEntropy(pw, document.getElementById('strengthBarPass'), document.getElementById('strengthLabelPass'), document.getElementById('entropyPass'));
+          updateStrengthAndEntropy(pw, document.getElementById('strengthBarPass'), document.getElementById('strengthLabelPass'), document.getElementById('entropyPass'), true);
           addToHistory(pw);
           if (config.ninja) applyNinja(pwTextPass);
         }
@@ -1574,22 +1666,40 @@
         }
 
         // ====== FEEDBACK ======
+        let audioCtx = null;
+        function getAudioContext() {
+          try {
+            if (!audioCtx) {
+              const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtxClass) audioCtx = new AudioCtxClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+              audioCtx.resume();
+            }
+            return audioCtx;
+          } catch (e) {
+            return null;
+          }
+        }
+
         function triggerFeedback() {
           if (config.feedback) {
             if (navigator.vibrate) navigator.vibrate(25);
-            try {
-              const ctx = new(window.AudioContext || window.webkitAudioContext)();
-              const osc = ctx.createOscillator();
-              osc.type = 'sine';
-              osc.frequency.value = 820;
-              const gain = ctx.createGain();
-              gain.gain.value = 0.08;
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.start();
-              osc.stop(ctx.currentTime + 0.1);
-            } catch (e) {}
+            const ctx = getAudioContext();
+            if (ctx) {
+              try {
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 820;
+                const gain = ctx.createGain();
+                gain.gain.value = 0.08;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+              } catch (e) {}
+            }
           }
         }
 
@@ -1627,13 +1737,24 @@
           const pw = generateClassic();
           if (pw) { displayClassic(pw); triggerFeedback(); }
         });
-        btnCopyClassic.addEventListener('click', async () => {
+
+        async function copyClassicPassword() {
           if (classicPassword) {
             await navigator.clipboard.writeText(classicPassword);
             btnCopyClassic.classList.add('copied');
             setTimeout(() => btnCopyClassic.classList.remove('copied'), 1500);
           }
-        });
+        }
+        btnCopyClassic.addEventListener('click', copyClassicPassword);
+        const boxClassic = document.getElementById('passwordBoxClassic');
+        if (boxClassic) {
+          boxClassic.addEventListener('click', (e) => {
+            if (e.target !== btnCopyClassic && !btnCopyClassic.contains(e.target)) copyClassicPassword();
+          });
+          boxClassic.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyClassicPassword(); }
+          });
+        }
 
         function handleNinjaInteraction(element, passwordValue) {
           if (config.ninja && passwordValue) applyNinja(element);
@@ -1664,31 +1785,45 @@
         includeNumbersPass.addEventListener('change', saveConfigToStorage);
         capitalizePass.addEventListener('change', saveConfigToStorage);
         
-        // Passphrase generation
+        // Passphrase generation with 256-word curated dictionaries
+        const wordListIT = [
+          'cane','gatto','albero','sole','luna','mare','monte','fiume','casa','libro','tempo','anno','giorno','notte','uomo','donna','bambino','fiore','strada','citta','tavolo','sedia','porta','finestra','pane','vino','latte','zucchero','sale','pepe','oro','argento','ferro','fuoco','acqua','terra','aria','cielo','nuvola','pioggia','neve','vento','luce','ombra','musica','colore','rosso','blu','verde','giallo','bianco','nero','forte','dolce','amaro','caldo','freddo','nuovo','vecchio','grande','piccolo','bello','brutto','veloce','lento','allegro','triste','coraggio','paura','amore','odio','pace','guerra','vita','morte','sogno','realta','spazio','inizio','fine','chiave','ponte','muro','torre','campana','stella','pianeta','galassia','universo','mistero','avventura','viaggio','ritorno','partenza','arrivo','salita','discesa','alba','tramonto','orizzonte','infinito','eterno','immenso','profondo','lontano','vicino','insieme','solo','unico','raro','prezioso','semplice','complicato','chiaro','oscuro','aperto','chiuso','libero','occupato','pieno','vuoto','calmo','agitato','sereno','tempesta','rifugio','tesoro','segreto','ricordo','speranza','fede','destino','fortuna','caso','scelta','errore','successo','fallimento','riposo','fatica','gioco','lavoro','studio','arte','scienza','storia','futuro','passato','presente','eternita',
+          'onda','bosco','valle','collina','sentiero','foglia','pianta','giardino','campo','prato','sasso','roccia','grotta','sabbia','isola','spiaggia','laguna','aurora','lampo','tuono','ghiaccio','brina','fiamma','cenere','polvere','fumo','vapore','stazione','treno','nave','barca','vela','ruota','motore','volo','ali','penna','foglio','pagina','lettera','parola','voce','canto','suono','eco','silenzio','battito','respiro','passo','orma','sguardo','sorriso','volto','mano','cuore','mente','pensiero','idea','ragione','anima','spirito','genio','forza','energia','vigore','valore','onore','premio','meta','vittoria','trionfo','scudo','lancia','corona','trono','regno','palazzo','castello','tempio','arco','colonna','statua','dipinto','quadro','teatro','favola','poesia','racconto','notizia','stampa','specchio','vetro','cristallo','lampada','candela','torcia','fiaccola','perla','rubino','zaffiro','diamante','anello','moneta','forziere','bussola','mappa','timone','ancora','faro','porto','radice','frutto','seme','ramo','boschetto','costa','scogliera','duna','cascata','sorgente','ruscello','stagno','palude','sentinella','custode','guida','pilota','esploratore','falco','aquila','lupo','leone','orso','cervo','volpe','rondine','colomba','delfino','balena','cavallo','drago','fenice','quercia','pino','ulivo','cipresso','rosa','giglio','viola','menta','salvia','timo','grano','orzo','miele','mela','pera','uva','noce'
+        ];
+        const wordListEN = [
+          'dog','cat','tree','sun','moon','sea','mountain','river','home','book','time','year','day','night','man','woman','child','flower','street','city','table','chair','door','window','bread','wine','milk','sugar','salt','pepper','gold','silver','iron','fire','water','earth','air','sky','cloud','rain','snow','wind','light','shadow','music','color','red','blue','green','yellow','white','black','strong','sweet','bitter','hot','cold','new','old','big','small','beautiful','ugly','fast','slow','happy','sad','courage','fear','love','hate','peace','war','life','death','dream','reality','space','start','end','key','bridge','wall','tower','bell','star','planet','galaxy','universe','mystery','adventure','journey','return','departure','arrival','climb','descent','dawn','sunset','horizon','infinite','eternal','immense','deep','far','near','together','alone','unique','rare','precious','simple','complicated','clear','dark','open','closed','free','busy','full','empty','calm','agitated','serene','storm','refuge','treasure','secret','memory','hope','faith','destiny','luck','chance','choice','error','success','failure','rest','fatigue','game','work','study','art','science','history','future','past','present','eternity',
+          'wave','forest','valley','hill','path','leaf','plant','garden','field','meadow','stone','rock','cave','sand','island','beach','lagoon','aurora','flash','thunder','ice','frost','flame','ash','dust','smoke','steam','station','train','ship','boat','sail','wheel','engine','flight','wing','pen','sheet','page','letter','word','voice','song','sound','echo','silence','beat','breath','step','trace','glance','smile','face','hand','heart','mind','thought','idea','reason','soul','spirit','genius','force','energy','vigor','value','honor','prize','target','victory','triumph','shield','spear','crown','throne','kingdom','palace','castle','temple','arch','column','statue','painting','picture','theater','fable','poetry','story','news','print','mirror','glass','crystal','lamp','candle','torch','beacon','pearl','ruby','sapphire','diamond','ring','coin','chest','compass','map','helm','anchor','lighthouse','harbor','root','fruit','seed','branch','grove','coast','cliff','dune','waterfall','source','brook','pond','marsh','guard','guide','pilot','scout','hawk','eagle','wolf','lion','bear','deer','fox','swallow','dove','dolphin','whale','horse','dragon','phoenix','oak','pine','olive','cypress','rose','lily','violet','mint','sage','thyme','wheat','barley','honey','apple','pear','grape','walnut'
+        ];
+
         btnGeneratePass.addEventListener('click', () => {
           const count = parseInt(wordCountSlider.value);
           const separator = separatorSelect.value;
-          
-          // Bilingual word list fallback based on language setting
-          const wordListIT = ['cane','gatto','albero','sole','luna','mare','monte','fiume','casa','libro','tempo','anno','giorno','notte','uomo','donna','bambino','fiore','strada','città','tavolo','sedia','porta','finestra','pane','vino','latte','zucchero','sale','pepe','oro','argento','ferro','fuoco','acqua','terra','aria','cielo','nuvola','pioggia','neve','vento','luce','ombra','musica','colore','rosso','blu','verde','giallo','bianco','nero','forte','dolce','amaro','caldo','freddo','nuovo','vecchio','grande','piccolo','bello','brutto','veloce','lento','allegro','triste','coraggio','paura','amore','odio','pace','guerra','vita','morte','sogno','realtà','spazio','inizio','fine','chiave','ponte','muro','torre','campana','stella','pianeta','galassia','universo','mistero','avventura','viaggio','ritorno','partenza','arrivo','salita','discesa','alba','tramonto','orizzonte','infinito','eterno','immenso','profondo','lontano','vicino','insieme','solo','unico','raro','prezioso','semplice','complicato','chiaro','oscuro','aperto','chiuso','libero','occupato','pieno','vuoto','calmo','agitato','sereno','tempesta','rifugio','tesoro','segreto','ricordo','speranza','fede','destino','fortuna','caso','scelta','errore','successo','fallimento','riposo','fatica','gioco','lavoro','studio','arte','scienza','storia','futuro','passato','presente','eternità'];
-          const wordListEN = ['dog','cat','tree','sun','moon','sea','mountain','river','home','book','time','year','day','night','man','woman','child','flower','street','city','table','chair','door','window','bread','wine','milk','sugar','salt','pepper','gold','silver','iron','fire','water','earth','air','sky','cloud','rain','snow','wind','light','shadow','music','color','red','blue','green','yellow','white','black','strong','sweet','bitter','hot','cold','new','old','big','small','beautiful','ugly','fast','slow','happy','sad','courage','fear','love','hate','peace','war','life','death','dream','reality','space','start','end','key','bridge','wall','tower','bell','star','planet','galaxy','universe','mystery','adventure','journey','return','departure','arrival','climb','descent','dawn','sunset','horizon','infinite','eternal','immense','deep','far','near','together','alone','unique','rare','precious','simple','complicated','clear','dark','open','closed','free','busy','full','empty','calm','agitated','serene','storm','refuge','treasure','secret','memory','hope','faith','destiny','luck','chance','choice','error','success','failure','rest','fatigue','game','work','study','art','science','history','future','past','present','eternity'];
-          
           const wordList = currentLang === 'en' ? wordListEN : wordListIT;
           
           let words = shuffle([...wordList]).slice(0, count);
           if (capitalizePass.checked) words = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
-          if (includeNumbersPass.checked) words = words.map(w => w + Math.floor(getSecureRandom() * 100));
+          if (includeNumbersPass.checked) words = words.map(w => w + getSecureRandomInt(100));
           displayPassphrase(words.join(separator));
           triggerFeedback();
         });
         
-        btnCopyPass.addEventListener('click', async () => {
+        async function copyPassphrase() {
           if (passphraseValue) {
             await navigator.clipboard.writeText(passphraseValue);
             btnCopyPass.classList.add('copied');
             setTimeout(() => btnCopyPass.classList.remove('copied'), 1500);
           }
-        });
+        }
+        btnCopyPass.addEventListener('click', copyPassphrase);
+        const boxPass = document.getElementById('passwordBoxPass');
+        if (boxPass) {
+          boxPass.addEventListener('click', (e) => {
+            if (e.target !== btnCopyPass && !btnCopyPass.contains(e.target)) copyPassphrase();
+          });
+          boxPass.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyPassphrase(); }
+          });
+        }
 
         // ====== BURGER E MODALI ======
         burgerBtn.addEventListener('click', (e) => {
@@ -1763,8 +1898,10 @@
           });
         });
 
-        document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
-          await clearHistory();
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+          showConfirm(i18nDict[currentLang].confirmDeleteHistory, async () => {
+            await clearHistory();
+          });
         });
 
         window.addEventListener('click', (e) => {
@@ -1773,6 +1910,24 @@
           if (e.target === historyModal) historyModal.classList.remove('active');
           if (e.target === settingsModal) settingsModal.classList.remove('active');
           if (e.target === confirmModal) confirmModal.classList.remove('active');
+        });
+
+        // Global Keyboard Accessibility
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            burgerMenu.classList.remove('active');
+            burgerBtn.setAttribute('aria-expanded', 'false');
+            aboutModal.classList.remove('active');
+            changelogModal.classList.remove('active');
+            historyModal.classList.remove('active');
+            settingsModal.classList.remove('active');
+            confirmModal.classList.remove('active');
+          } else if ((e.key === 'g' || e.key === 'G') && !['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) {
+            if (!document.querySelector('.modal-overlay.active')) {
+              if (currentMode === 'classic') btnGenerateClassic.click();
+              else btnGeneratePass.click();
+            }
+          }
         });
 
         // ====== INIZIALIZZAZIONE ======
@@ -1808,8 +1963,8 @@
         }
 
         const changelogData = [
-          { version: '2.0.0', text: 'Secure Math.random() replacement (crypto API), improved Accessibility (larger hitboxes, aria labels), fully Multi-language support (EN/IT), layout/bug fixes.' },
-          { version: '1.97', text: 'Aggiunto file manifest.js ed icone per PWA.' },
+          { version: '2.0.0', text: 'Secure Web Crypto API (zero-modulo bias CSPRNG), offline Service Worker PWA, improved Accessibility (expanded hitboxes, ARIA labels, keyboard shortcuts), full Multi-language (EN/IT), layout/bug fixes.' },
+          { version: '1.97', text: 'Aggiunto file manifest.json ed icone per PWA.' },
           { version: '1.96', text: 'Allineata la sezione passphrase, indicatori bianchi, changelog invertito.' },
           { version: '1.95', text: 'Ottimizzazione navigazione modali mobile, ninja mode, nuovo modale Impostazioni.' },
           { version: '1.9',  text: 'Migliorata sicurezza cronologia con escape HTML, nuovi separatori.' },
@@ -1824,6 +1979,15 @@
           });
           html += '</ul>';
           container.innerHTML = html;
+        }
+
+        // Service Worker Registration for Offline PWA
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch((err) => {
+              console.log('SW registration note:', err.message);
+            });
+          });
         }
 
         console.log('EasyPass v2.0.0 initialized successfully');
