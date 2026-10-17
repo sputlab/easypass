@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Password Sicure</title>
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --card-bg: rgba(22, 22, 40, 0.85);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text: #e0e0e0;
+            --text-secondary: #a0a0b8;
+            --accent: #6c5ce7;
+            --accent-hover: #7f6ff0;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --toggle-lower: #2ecc71;
+            --toggle-upper: #3498db;
+            --toggle-digit: #f39c12;
+            --toggle-special: #e056a0;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a35 30%, #0d1117 60%, #0c0c1d 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sfondo animato sottile */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(108, 92, 231, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 70%, rgba(224, 86, 160, 0.05) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(46, 204, 113, 0.03) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgDrift 20s ease-in-out infinite;
+        }
+
+        @keyframes bgDrift {
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(1%, -0.5%) rotate(0.5deg);
+            }
+            50% {
+                transform: translate(-0.5%, 1%) rotate(-0.5deg);
+            }
+            75% {
+                transform: translate(-1%, -0.5%) rotate(0.3deg);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            margin-bottom: 12px;
+            font-size: 24px;
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Sezione password generata */
+        .password-section {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .password-display {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            padding: 6px 6px 6px 18px;
+            transition: all var(--transition);
+            gap: 8px;
+        }
+
+        .password-display:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+        }
+
+        .password-text {
+            flex: 1;
+            font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            color: #fff;
+            background: transparent;
+            border: none;
+            outline: none;
+            min-height: 36px;
+            word-break: break-all;
+            line-height: 1.4;
+            user-select: all;
+            transition: color 0.15s;
+        }
+
+        .password-text.placeholder {
+            color: #555;
+            letter-spacing: 0;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .btn-copy {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            color: #ccc;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+        }
+        .btn-copy:active {
+            transform: scale(0.93);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-copy.copied {
+            background: var(--success);
+            color: #fff;
+            animation: copyPulse 0.5s ease;
+        }
+
+        @keyframes copyPulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .btn-copy .tooltip-copy {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) translateY(6px);
+            background: #333;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.2s ease;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            letter-spacing: 0;
+        }
+
+        .btn-copy.copied .tooltip-copy {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            background: var(--success);
+        }
+
+        /* Barra complessità */
+        .strength-section {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strength-bar-container {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .strength-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.2), background-color 0.4s ease;
+            width: 0%;
+            background: #555;
+        }
+
+        .strength-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            min-width: 55px;
+            text-align: right;
+            transition: color 0.4s ease;
+            color: #777;
+        }
+
+        .strength-label.level-weak {
+            color: var(--danger);
+        }
+        .strength-label.level-medium {
+            color: var(--warning);
+        }
+        .strength-label.level-strong {
+            color: var(--success);
+        }
+        .strength-label.level-very-strong {
+            color: #00e676;
+        }
+
+        /* Sezione lunghezza totale */
+        .length-section {
+            margin-bottom: 22px;
+        }
+
+        .length-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .length-header label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .length-value {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #fff;
+            background: rgba(108, 92, 231, 0.2);
+            padding: 4px 14px;
+            border-radius: 20px;
+            min-width: 44px;
+            text-align: center;
+            transition: all var(--transition);
+        }
+
+        /* Range slider custom */
+        .range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.5);
+            transition: all 0.2s;
+            cursor: grab;
+        }
+        .range-slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(108, 92, 231, 0.7);
+        }
+        .range-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.5);
+        }
+
+        /* Toggle rows */
+        .toggles-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .toggle-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .toggle-row.disabled-row {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        .toggle-row .icon-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+        .icon-indicator.lower {
+            background: var(--toggle-lower);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+        .icon-indicator.upper {
+            background: var(--toggle-upper);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        .icon-indicator.digit {
+            background: var(--toggle-digit);
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        }
+        .icon-indicator.special {
+            background: var(--toggle-special);
+            box-shadow: 0 0 10px rgba(224, 86, 160, 0.5);
+        }
+
+        .toggle-row .toggle-label-text {
+            flex: 1;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #ccc;
+            user-select: none;
+            cursor: pointer;
+            transition: color var(--transition);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            transition: all var(--transition);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--accent);
+        }
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(22px);
+        }
+
+        /* Mini input number */
+        .mini-number-input {
+            width: 50px;
+            height: 32px;
+            background: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: 7px;
+            color: #fff;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            transition: all var(--transition);
+            flex-shrink: 0;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .mini-number-input::-webkit-outer-spin-button,
+        .mini-number-input::-webkit-inner-spin-button {
+            opacity: 1;
+            height: 28px;
+        }
+
+        .mini-number-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .mini-number-input:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Riepilogo */
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            padding: 0 4px;
+            min-height: 20px;
+        }
+
+        .summary-row .remaining {
+            font-weight: 600;
+            transition: color var(--transition);
+        }
+        .summary-row .remaining.ok {
+            color: var(--success);
+        }
+        .summary-row .remaining.warn {
+            color: var(--warning);
+        }
+        .summary-row .remaining.error {
+            color: var(--danger);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-4px);
+            }
+            75% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* Error message */
+        .error-msg {
+            font-size: 0.78rem;
+            color: var(--danger);
+            text-align: center;
+            min-height: 18px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+
+        /* Pulsante genera */
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent), #5a4bd1);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.4px;
+            transition: all var(--transition);
+            box-shadow: 0 8px 28px rgba(108, 92, 231, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, var(--accent-hover), #6b5ce7);
+            box-shadow: 0 12px 36px rgba(108, 92, 231, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-generate:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 14px rgba(108, 92, 231, 0.4);
+            transition: all 0.1s;
+        }
+        .btn-generate:disabled {
+            background: #444;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.5;
+        }
+
+        .btn-generate .spark-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+        .btn-generate:hover .spark-icon {
+            transform: rotate(-15deg) scale(1.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card {
+                padding: 22px 16px;
+                border-radius: 12px;
+            }
+            .password-text {
+                font-size: 1rem;
+                letter-spacing: 0.5px;
+            }
+            .toggle-row {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+            .toggle-row .toggle-label-text {
+                font-size: 0.8rem;
+            }
+            .mini-number-input {
+                width: 42px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+            .toggle-switch {
+                width: 40px;
+                height: 22px;
+            }
+            .toggle-slider::before {
+                height: 16px;
+                width: 16px;
+                left: 3px;
+                bottom: 3px;
+            }
+            .toggle-switch input:checked+.toggle-slider::before {
+                transform: translateX(18px);
+            }
+            .header h1 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-icon">🔐</div>
+                <h1>Generatore Password</h1>
+                <p>Crea password robuste e personalizzate</p>
+            </div>
+
+            <!-- Password generata -->
+            <div class="password-section">
+                <div class="password-display" id="passwordDisplayWrapper">
+                    <span class="password-text placeholder" id="passwordText">La tua password apparirà qui</span>
+                    <button class="btn-copy" id="btnCopy" title="Copia password" disabled>
+                        📋
+                        <span class="tooltip-copy">Copiato!</span>
+                    </button>
+                </div>
+                <!-- Barra complessità -->
+                <div class="strength-section" id="strengthSection">
+                    <div class="strength-bar-container">
+                        <div class="strength-bar-fill" id="strengthBarFill"></div>
+                    </div>
+                    <span class="strength-label" id="strengthLabel">—</span>
+                </div>
+            </div>
+
+            <!-- Lunghezza totale -->
+            <div class="length-section">
+                <div class="length-header">
+                    <label for="totalLength">Lunghezza totale</label>
+                    <span class="length-value" id="lengthValueDisplay">16</span>
+                </div>
+                <input type="range" class="range-slider" id="totalLength" min="4" max="64" value="16" step="1">
+            </div>
+
+            <!-- Toggles -->
+            <div class="toggles-section">
+                <!-- Minuscole -->
+                <div class="toggle-row" id="rowLower">
+                    <span class="icon-indicator lower"></span>
+                    <span class="toggle-label-text" id="labelLower">Minuscole (a-z)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleLower" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <input type="number" class="mini-number-input" id="countLower" value="4" min="0" max="64" aria-label="Numero minimo minuscole">
+                </div>
+
+                <!-- Maiuscole -->
+                <div class="toggle-row" id="rowUpper">
+                    <span class="icon-indicator upper"></span>
+                    <span class="toggle-label-text" id="labelUpper">Maiuscole (A-Z)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleUpper" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <input type="number" class="mini-number-input" id="countUpper" value="3" min="0" max="64" aria-label="Numero minimo maiuscole">
+                </div>
+
+                <!-- Numeri -->
+                <div class="toggle-row" id="rowDigit">
+                    <span class="icon-indicator digit"></span>
+                    <span class="toggle-label-text" id="labelDigit">Numeri (0-9)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleDigit" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <input type="number" class="mini-number-input" id="countDigit" value="3" min="0" max="64" aria-label="Numero minimo numeri">
+                </div>
+
+                <!-- Speciali -->
+                <div class="toggle-row" id="rowSpecial">
+                    <span class="icon-indicator special"></span>
+                    <span class="toggle-label-text" id="labelSpecial">Speciali (!@#$...)</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleSpecial" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <input type="number" class="mini-number-input" id="countSpecial" value="2" min="0" max="64" aria-label="Numero minimo caratteri speciali">
+                </div>
+            </div>
+
+            <!-- Riepilogo e errori -->
+            <div class="summary-row">
+                <span id="summaryText">Caratteri casuali extra: 4</span>
+                <span class="remaining ok" id="remainingIndicator">✓</span>
+            </div>
+            <div class="error-msg" id="errorMsg"></div>
+
+            <!-- Pulsante Genera -->
+            <button class="btn-generate" id="btnGenerate">
+                <span class="spark-icon">⚡</span> Genera Password
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- Elementi DOM ---
+            const passwordText = document.getElementById('passwordText');
+            const btnCopy = document.getElementById('btnCopy');
+            const btnGenerate = document.getElementById('btnGenerate');
+            const totalLengthSlider = document.getElementById('totalLength');
+            const lengthValueDisplay = document.getElementById('lengthValueDisplay');
+            const strengthBarFill = document.getElementById('strengthBarFill');
+            const strengthLabel = document.getElementById('strengthLabel');
+            const errorMsg = document.getElementById('errorMsg');
+            const summaryText = document.getElementById('summaryText');
+            const remainingIndicator = document.getElementById('remainingIndicator');
+
+            // Toggle e counter
+            const toggleLower = document.getElementById('toggleLower');
+            const toggleUpper = document.getElementById('toggleUpper');
+            const toggleDigit = document.getElementById('toggleDigit');
+            const toggleSpecial = document.getElementById('toggleSpecial');
+            const countLower = document.getElementById('countLower');
+            const countUpper = document.getElementById('countUpper');
+            const countDigit = document.getElementById('countDigit');
+            const countSpecial = document.getElementById('countSpecial');
+            const rowLower = document.getElementById('rowLower');
+            const rowUpper = document.getElementById('rowUpper');
+            const rowDigit = document.getElementById('rowDigit');
+            const rowSpecial = document.getElementById('rowSpecial');
+
+            // Tutti i toggle e counter in array
+            const toggleConfigs = [
+                { toggle: toggleLower, count: countLower, row: rowLower, chars: 'abcdefghijklmnopqrstuvwxyz',
+                    name: 'minuscole' },
+                { toggle: toggleUpper, count: countUpper, row: rowUpper, chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                    name: 'maiuscole' },
+                { toggle: toggleDigit, count: countDigit, row: rowDigit, chars: '0123456789', name: 'numeri' },
+                { toggle: toggleSpecial, count: countSpecial, row: rowSpecial,
+                    chars: '!@#$%^&*()_+-=[]{}|;:,.<>?/~', name: 'speciali' },
+            ];
+
+            // --- Stato ---
+            let currentPassword = '';
+
+            // --- Funzioni di utilità ---
+            function shuffleArray(arr) {
+                const a = [...arr];
+                // Fisher-Yates shuffle
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            function getRandomChar(charset) {
+                return charset[Math.floor(Math.random() * charset.length)];
+            }
+
+            // --- Validazione e calcoli ---
+            function getActiveConfigs() {
+                return toggleConfigs.filter(c => c.toggle.checked);
+            }
+
+            function getTotalMinRequired() {
+                let sum = 0;
+                toggleConfigs.forEach(c => {
+                    if (c.toggle.checked) {
+                        const val = parseInt(c.count.value) || 0;
+                        sum += Math.max(0, val);
+                    }
+                });
+                return sum;
+            }
+
+            function getTotalLength() {
+                return parseInt(totalLengthSlider.value) || 16;
+            }
+
+            function getRemainingSlots() {
+                return getTotalLength() - getTotalMinRequired();
+            }
+
+            function validateConfig() {
+                const active = getActiveConfigs();
+                const totalLength = getTotalLength();
+                const totalMin = getTotalMinRequired();
+
+                if (active.length === 0) {
+                    return { valid: false, msg: 'Seleziona almeno un tipo di carattere.' };
+                }
+                if (totalMin > totalLength) {
+                    return {
+                        valid: false,
+                        msg: `La somma dei minimi (${totalMin}) supera la lunghezza totale (${totalLength}). Riduci i valori o aumenta la lunghezza.`
+                    };
+                }
+                // Controlla che ogni counter attivo non superi da solo il totale
+                for (const c of active) {
+                    const val = parseInt(c.count.value) || 0;
+                    if (val > totalLength) {
+                        return {
+                            valid: false,
+                            msg: `Il valore per "${c.name}" (${val}) supera la lunghezza totale (${totalLength}).`
+                        };
+                    }
+                }
+                return { valid: true, msg: '' };
+            }
+
+            // --- Aggiornamento UI ---
+            function updateUIState() {
+                const active = getActiveConfigs();
+                const totalLength = getTotalLength();
+                const totalMin = getTotalMinRequired();
+                const remaining = totalLength - totalMin;
+                const validation = validateConfig();
+
+                // Aggiorna slider display
+                lengthValueDisplay.textContent = totalLength;
+
+                // Aggiorna contatori (disabilita se toggle off)
+                toggleConfigs.forEach(c => {
+                    c.count.disabled = !c.toggle.checked;
+                    if (!c.toggle.checked) {
+                        c.count.value = 0;
+                        c.row.classList.add('disabled-row');
+                    } else {
+                        c.row.classList.remove('disabled-row');
+                        // Se era 0 e viene acceso, metti un default di 1
+                        if (parseInt(c.count.value) === 0 || c.count.value === '') {
+                            c.count.value = 1;
+                        }
+                    }
+                });
+
+                // Aggiorna riepilogo
+                if (active.length === 0) {
+                    summaryText.textContent = 'Nessun tipo selezionato';
+                    remainingIndicator.textContent = '✗';
+                    remainingIndicator.className = 'remaining error';
+                } else if (remaining < 0) {
+                    summaryText.textContent = `Eccesso di ${Math.abs(remaining)} caratteri!`;
+                    remainingIndicator.textContent = '✗';
+                    remainingIndicator.className = 'remaining error';
+                } else if (remaining === 0) {
+                    summaryText.textContent = 'Nessun carattere casuale extra';
+                    remainingIndicator.textContent = '✓';
+                    remainingIndicator.className = 'remaining ok';
+                } else {
+                    summaryText.textContent = `Caratteri casuali extra: ${remaining}`;
+                    remainingIndicator.textContent = '✓';
+                    remainingIndicator.className = 'remaining ok';
+                }
+
+                // Messaggio errore
+                if (!validation.valid) {
+                    errorMsg.textContent = validation.msg;
+                    btnGenerate.disabled = true;
+                } else {
+                    errorMsg.textContent = '';
+                    btnGenerate.disabled = false;
+                }
+
+                // Forza i valori dei counter entro limiti ragionevoli
+                toggleConfigs.forEach(c => {
+                    if (c.toggle.checked) {
+                        let val = parseInt(c.count.value) || 0;
+                        val = Math.max(0, Math.min(val, totalLength));
+                        c.count.value = val;
+                    }
+                });
+            }
+
+            // --- Generazione password ---
+            function generatePassword() {
+                const validation = validateConfig();
+                if (!validation.valid) {
+                    updateUIState();
+                    return;
+                }
+
+                const totalLength = getTotalLength();
+                const activeConfigs = getActiveConfigs();
+                const totalMin = getTotalMinRequired();
+                const remainingSlots = totalLength - totalMin;
+
+                // Array per i caratteri della password
+                let passwordChars = [];
+
+                // 1. Aggiungi i caratteri minimi richiesti per ogni set attivo
+                activeConfigs.forEach(c => {
+                    const minCount = parseInt(c.count.value) || 0;
+                    for (let i = 0; i < minCount; i++) {
+                        passwordChars.push(getRandomChar(c.chars));
+                    }
+                });
+
+                // 2. Set combinato di tutti i caratteri attivi per i rimanenti
+                const combinedCharset = activeConfigs.map(c => c.chars).join('');
+
+                // 3. Riempi i rimanenti slot con caratteri casuali dal set combinato
+                for (let i = 0; i < remainingSlots; i++) {
+                    passwordChars.push(getRandomChar(combinedCharset));
+                }
+
+                // 4. Mescola tutto
+                passwordChars = shuffleArray(passwordChars);
+
+                // 5. Assicurati che non ci siano pattern troppo ovvi (es. tutti uguali all'inizio)
+                //    Un secondo shuffle per sicurezza
+                passwordChars = shuffleArray(passwordChars);
+
+                const password = passwordChars.join('');
+                return password;
+            }
+
+            function displayPassword(password) {
+                currentPassword = password;
+                passwordText.textContent = password;
+                passwordText.classList.remove('placeholder');
+                btnCopy.disabled = false;
+                updateStrengthIndicator(password);
+            }
+
+            function clearPassword() {
+                currentPassword = '';
+                passwordText.textContent = 'La tua password apparirà qui';
+                passwordText.classList.add('placeholder');
+                btnCopy.disabled = true;
+                btnCopy.classList.remove('copied');
+                strengthBarFill.style.width = '0%';
+                strengthBarFill.style.backgroundColor = '#555';
+                strengthLabel.textContent = '—';
+                strengthLabel.className = 'strength-label';
+            }
+
+            // --- Indicatore complessità ---
+            function updateStrengthIndicator(password) {
+                if (!password || password.length === 0) {
+                    strengthBarFill.style.width = '0%';
+                    strengthBarFill.style.backgroundColor = '#555';
+                    strengthLabel.textContent = '—';
+                    strengthLabel.className = 'strength-label';
+                    return;
+                }
+
+                const length = password.length;
+                const hasLower = /[a-z]/.test(password);
+                const hasUpper = /[A-Z]/.test(password);
+                const hasDigit = /\d/.test(password);
+                const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+
+                const typesUsed = [hasLower, hasUpper, hasDigit, hasSpecial].filter(Boolean).length;
+
+                // Punteggio lunghezza (0-50)
+                let lengthScore = Math.min(length / 20, 1) * 50;
+                // Penalità per password corte
+                if (length < 8) lengthScore = Math.min(lengthScore, 25);
+                if (length < 6) lengthScore = Math.min(lengthScore, 10);
+
+                // Punteggio varietà (0-50)
+                const varietyScore = (typesUsed / 4) * 50;
+
+                // Bonus per password lunghe con tutti i tipi
+                let bonus = 0;
+                if (length >= 16 && typesUsed === 4) bonus = 15;
+                if (length >= 20 && typesUsed === 4) bonus = 20;
+
+                let totalScore = Math.min(lengthScore + varietyScore + bonus, 100);
+
+                let level, color, labelText;
+                if (totalScore < 30) {
+                    level = 'weak';
+                    color = '#e74c3c';
+                    labelText = 'Debole';
+                } else if (totalScore < 55) {
+                    level = 'medium';
+                    color = '#f39c12';
+                    labelText = 'Media';
+                } else if (totalScore < 80) {
+                    level = 'strong';
+                    color = '#2ecc71';
+                    labelText = 'Forte';
+                } else {
+                    level = 'very-strong';
+                    color = '#00e676';
+                    labelText = 'Molto forte';
+                }
+
+                strengthBarFill.style.width = totalScore + '%';
+                strengthBarFill.style.backgroundColor = color;
+                strengthLabel.textContent = labelText;
+                strengthLabel.className = 'strength-label level-' + level;
+            }
+
+            // --- Azione genera ---
+            function handleGenerate() {
+                updateUIState();
+                const validation = validateConfig();
+                if (!validation.valid) {
+                    clearPassword();
+                    // Piccolo shake sul pulsante per feedback
+                    btnGenerate.style.animation = 'none';
+                    btnGenerate.offsetHeight; // trigger reflow
+                    btnGenerate.style.animation = 'shake 0.5s ease';
+                    setTimeout(() => { btnGenerate.style.animation = ''; }, 500);
+                    return;
+                }
+                const password = generatePassword();
+                if (password) {
+                    displayPassword(password);
+                    // Breve highlight sul campo password
+                    const displayWrapper = document.getElementById('passwordDisplayWrapper');
+                    displayWrapper.style.borderColor = 'var(--success)';
+                    displayWrapper.style.boxShadow = '0 0 0 4px rgba(46, 204, 113, 0.2)';
+                    setTimeout(() => {
+                        displayWrapper.style.borderColor = 'var(--input-border)';
+                        displayWrapper.style.boxShadow = '';
+                    }, 600);
+                }
+            }
+
+            // --- Copia ---
+            async function handleCopy() {
+                if (!currentPassword) return;
+                try {
+                    await navigator.clipboard.writeText(currentPassword);
+                    btnCopy.classList.add('copied');
+                    // Cambia temporaneamente l'icona
+                    btnCopy.innerHTML = '✅<span class="tooltip-copy">Copiato!</span>';
+                    setTimeout(() => {
+                        btnCopy.classList.remove('copied');
+                        btnCopy.innerHTML = '📋<span class="tooltip-copy">Copiato!</span>';
+                    }, 2000);
+                } catch (err) {
+                    // Fallback per browser meno recenti
+                    const textArea = document.createElement('textarea');
+                    textArea.value = currentPassword;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-9999px';
+                    textArea.style.top = '-9999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        btnCopy.classList.add('copied');
+                        btnCopy.innerHTML = '✅<span class="tooltip-copy">Copiato!</span>';
+                        setTimeout(() => {
+                            btnCopy.classList.remove('copied');
+                            btnCopy.innerHTML = '📋<span class="tooltip-copy">Copiato!</span>';
+                        }, 2000);
+                    } catch (e) {
+                        alert('Impossibile copiare la password. Selezionala e copia manualmente.');
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            // --- Event Listeners ---
+            totalLengthSlider.addEventListener('input', () => {
+                updateUIState();
+                // Se c'è già una password generata, rigenera automaticamente
+                if (currentPassword && validateConfig().valid) {
+                    const pw = generatePassword();
+                    if (pw) displayPassword(pw);
+                } else if (!validateConfig().valid) {
+                    clearPassword();
+                }
+            });
+
+            // Per ogni toggle
+            toggleConfigs.forEach(c => {
+                c.toggle.addEventListener('change', () => {
+                    updateUIState();
+                    if (currentPassword && validateConfig().valid) {
+                        const pw = generatePassword();
+                        if (pw) displayPassword(pw);
+                    } else if (!validateConfig().valid) {
+                        clearPassword();
+                    }
+                });
+
+                c.count.addEventListener('input', () => {
+                    let val = parseInt(c.count.value);
+                    if (isNaN(val) || val < 0) c.count.value = 0;
+                    val = parseInt(c.count.value);
+                    const totalLen = getTotalLength();
+                    if (val > totalLen) c.count.value = totalLen;
+                    updateUIState();
+                    if (currentPassword && validateConfig().valid) {
+                        const pw = generatePassword();
+                        if (pw) displayPassword(pw);
+                    } else if (!validateConfig().valid) {
+                        clearPassword();
+                    }
+                });
+
+                c.count.addEventListener('blur', () => {
+                    if (c.count.value === '' || parseInt(c.count.value) < 0) {
+                        c.count.value = c.toggle.checked ? 1 : 0;
+                    }
+                    updateUIState();
+                });
+            });
+
+            btnGenerate.addEventListener('click', handleGenerate);
+            btnCopy.addEventListener('click', handleCopy);
+
+            // Click sul testo password per selezionarlo
+            passwordText.addEventListener('click', () => {
+                if (currentPassword) {
+                    const range = document.createRange();
+                    range.selectNodeContents(passwordText);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            });
+
+            // --- Inizializzazione ---
+            function init() {
+                updateUIState();
+                // Genera una password iniziale
+                const pw = generatePassword();
+                if (pw) displayPassword(pw);
+            }
+
+            init();
+
+            console.log('🔐 Generatore di Password pronto!');
+            console.log('   Default: 16 caratteri con minuscole, maiuscole, numeri e speciali.');
+            console.log('   Usa i toggle e i contatori per personalizzare.');
+        })();
+    </script>
+</body>
+</html>

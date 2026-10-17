@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyPass - Generatore di Password Sicure</title>
+    <style>
+        /* ===== VARIABILI GLOBALI (modificate da JS per i temi) ===== */
+        :root {
+            --bg: #0c0c1e;
+            --card-bg: rgba(18, 18, 32, 0.9);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text: #e0e0e0;
+            --text-secondary: #a0a0b8;
+            --accent: #6c5ce7;
+            --accent-hover: #7f6ff0;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --color-lower: #6ee7b7;
+            --color-upper: #7dd3fc;
+            --color-digit: #fcd34d;
+            --color-special: #f0abfc;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --toggle-bg: rgba(255, 255, 255, 0.18);
+            --toggle-row-bg: rgba(255, 255, 255, 0.025);
+            --toggle-row-hover: rgba(255, 255, 255, 0.05);
+            --icon-lower: var(--color-lower);
+            --icon-upper: var(--color-upper);
+            --icon-digit: var(--color-digit);
+            --icon-special: var(--color-special);
+            --btn-copy-bg: rgba(255, 255, 255, 0.06);
+            --range-bg: rgba(255, 255, 255, 0.1);
+            --menu-bg: #1e1e2f;
+            --menu-item-hover: rgba(255, 255, 255, 0.06);
+            --modal-overlay: rgba(0,0,0,0.7);
+        }
+
+        /* Tema chiaro */
+        body.theme-light {
+            --bg: #f5f5f7;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --text: #1a1a2e;
+            --text-secondary: #555;
+            --accent: #5a4bd1;
+            --accent-hover: #4b3ec4;
+            --input-bg: rgba(0, 0, 0, 0.04);
+            --input-border: rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --toggle-bg: rgba(0, 0, 0, 0.15);
+            --toggle-row-bg: rgba(0, 0, 0, 0.02);
+            --toggle-row-hover: rgba(0, 0, 0, 0.04);
+            --color-lower: #0f7b4e;
+            --color-upper: #1a5f8a;
+            --color-digit: #b86e0e;
+            --color-special: #a63c7d;
+            --icon-lower: #0f7b4e;
+            --icon-upper: #1a5f8a;
+            --icon-digit: #b86e0e;
+            --icon-special: #a63c7d;
+            --btn-copy-bg: rgba(0, 0, 0, 0.06);
+            --range-bg: rgba(0, 0, 0, 0.1);
+            --menu-bg: #ffffff;
+            --menu-item-hover: rgba(0, 0, 0, 0.04);
+            --modal-overlay: rgba(0,0,0,0.5);
+        }
+
+        /* Tema dark (più scuro, colori primari vividi) */
+        body.theme-dark {
+            --bg: #0a0a0f;
+            --card-bg: rgba(10, 10, 20, 0.92);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --text: #d0d0e0;
+            --text-secondary: #7a7a8c;
+            --accent: #8b5cf6;
+            --accent-hover: #9f7ef6;
+            --color-lower: #4ade80;
+            --color-upper: #38bdf8;
+            --color-digit: #fbbf24;
+            --color-special: #e879f9;
+            --icon-lower: #4ade80;
+            --icon-upper: #38bdf8;
+            --icon-digit: #fbbf24;
+            --icon-special: #e879f9;
+            --input-bg: rgba(255, 255, 255, 0.04);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --toggle-bg: rgba(255, 255, 255, 0.12);
+            --toggle-row-bg: rgba(255, 255, 255, 0.015);
+            --toggle-row-hover: rgba(255, 255, 255, 0.04);
+            --btn-copy-bg: rgba(255, 255, 255, 0.05);
+            --range-bg: rgba(255, 255, 255, 0.08);
+            --menu-bg: #12121f;
+            --menu-item-hover: rgba(255, 255, 255, 0.05);
+            --modal-overlay: rgba(0,0,0,0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            color: var(--text);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 530px;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 28px 28px 20px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Header con burger */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-icon {
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+        .header-left p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .burger-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+            line-height: 1;
+        }
+        .burger-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Menu a tendina */
+        .burger-menu {
+            position: absolute;
+            top: 70px; right: 10px;
+            background: var(--menu-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+            min-width: 200px;
+            z-index: 100;
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.25s ease;
+            backdrop-filter: blur(20px);
+        }
+        .burger-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .burger-menu .menu-item {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex; align-items: center; gap: 8px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .burger-menu .menu-item:hover {
+            background: var(--menu-item-hover);
+        }
+        .menu-divider {
+            height: 1px;
+            background: var(--card-border);
+            margin: 6px 0;
+        }
+        .theme-submenu {
+            padding-left: 22px;
+            font-size: 0.82rem;
+        }
+
+        /* Resto invariato */
+        .password-section { margin-bottom: 18px; }
+        .password-display {
+            display: flex; align-items: center;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            padding: 8px 8px 8px 18px;
+            transition: all 0.25s;
+            gap: 8px;
+            min-height: 56px;
+        }
+        .password-display:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(108,92,231,0.12);
+        }
+        .password-text {
+            flex:1;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.25rem;
+            letter-spacing: 0.8px;
+            word-break: break-all;
+            color: #fff;
+            background: transparent;
+            border:none; outline:none;
+            transition: color 0.2s;
+            user-select: all;
+            display: inline-block;
+        }
+        .password-text.placeholder {
+            color: #5a5a6e;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+            font-size: 0.95rem;
+            user-select: none;
+            letter-spacing: 0;
+        }
+        .password-text .char-lower { color: var(--color-lower); text-shadow: 0 0 8px rgba(110,231,183,0.3); }
+        .password-text .char-upper { color: var(--color-upper); text-shadow: 0 0 8px rgba(125,211,252,0.3); }
+        .password-text .char-digit { color: var(--color-digit); text-shadow: 0 0 8px rgba(252,211,77,0.3); }
+        .password-text .char-special { color: var(--color-special); text-shadow: 0 0 8px rgba(240,171,252,0.3); }
+
+        .btn-copy {
+            flex-shrink:0; width:44px; height:44px; border-radius:10px;
+            border:none; background: var(--btn-copy-bg); color:#ccc;
+            cursor:pointer; transition: all 0.25s;
+            display:flex; align-items:center; justify-content:center;
+            font-size:18px; position:relative;
+        }
+        .btn-copy:hover { background: rgba(255,255,255,0.14); color:#fff; }
+        .btn-copy.copied { background: var(--success); color:#fff; animation: copyPulse 0.5s ease; }
+        @keyframes copyPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.13);} }
+        .btn-copy .tooltip-copy {
+            position:absolute; bottom:120%; left:50%; transform:translateX(-50%) translateY(6px);
+            background:#333; color:#fff; font-size:0.68rem; padding:4px 10px; border-radius:6px;
+            white-space:nowrap; pointer-events:none; opacity:0; transition:0.2s;
+        }
+        .btn-copy.copied .tooltip-copy { opacity:1; transform:translateX(-50%) translateY(0); background: var(--success); }
+
+        .strength-section { margin-top:10px; display:flex; align-items:center; gap:10px; }
+        .strength-bar-container { flex:1; height:8px; background:rgba(255,255,255,0.08); border-radius:10px; overflow:hidden; }
+        .strength-bar-fill { height:100%; border-radius:10px; transition: width 0.5s, background 0.4s; width:0%; background:#555; }
+        .strength-label { font-size:0.78rem; font-weight:600; min-width:65px; text-align:right; transition:color 0.4s; color:#777; }
+        .strength-label.level-weak { color:var(--danger); }
+        .strength-label.level-medium { color:var(--warning); }
+        .strength-label.level-strong { color:var(--success); }
+        .strength-label.level-very-strong { color:#00e676; }
+
+        .length-section { margin-bottom:20px; }
+        .length-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+        .length-header label { font-weight:600; font-size:0.9rem; color:#ddd; }
+        .length-value { font-weight:700; font-size:1.2rem; color:#fff; background:rgba(108,92,231,0.22); padding:4px 14px; border-radius:20px; }
+        .range-slider { -webkit-appearance:none; width:100%; height:8px; border-radius:10px; background: var(--range-bg); outline:none; cursor:pointer; }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--accent); cursor:pointer; box-shadow:0 4px 16px rgba(108,92,231,0.5); }
+        .range-slider::-moz-range-thumb { width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--accent); cursor:pointer; }
+
+        .toggles-section { display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+        .toggle-row {
+            display:flex; align-items:center; gap:10px; padding:10px 14px;
+            background: var(--toggle-row-bg); border-radius:12px; transition:0.25s; border:1px solid transparent;
+        }
+        .toggle-row:hover { background: var(--toggle-row-hover); border-color:rgba(255,255,255,0.06); }
+        .toggle-row.disabled-row { opacity:0.45; pointer-events:auto; }
+        .icon-indicator { width:12px; height:12px; border-radius:50%; flex-shrink:0; box-shadow:0 0 10px currentColor; }
+        .icon-indicator.lower { background: var(--icon-lower); }
+        .icon-indicator.upper { background: var(--icon-upper); }
+        .icon-indicator.digit { background: var(--icon-digit); }
+        .icon-indicator.special { background: var(--icon-special); }
+        .toggle-label-text { flex:1; font-size:0.9rem; font-weight:500; color:#ccc; user-select:none; cursor:pointer; }
+        .toggle-switch { position:relative; width:48px; height:26px; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background: var(--toggle-bg); border-radius:30px; transition:0.25s; }
+        .toggle-slider::before { content:''; position:absolute; height:20px; width:20px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; }
+        .toggle-switch input:checked+.toggle-slider { background: var(--accent); }
+        .toggle-switch input:checked+.toggle-slider::before { transform:translateX(22px); }
+        .mini-number-input {
+            width:52px; height:32px; background:var(--input-bg); border:1.5px solid var(--input-border);
+            border-radius:8px; color:#fff; text-align:center; font-size:0.85rem; font-weight:600; transition:0.25s; flex-shrink:0;
+        }
+        .mini-number-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(108,92,231,0.15); }
+        .mini-number-input:disabled { opacity:0.3; cursor:not-allowed; }
+
+        .summary-row { display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px; padding:0 4px; }
+        .remaining.ok { color:var(--success); } .remaining.error { color:var(--danger); } .remaining.warn { color:var(--warning); }
+        .error-msg { font-size:0.78rem; color:var(--danger); text-align:center; min-height:20px; margin-bottom:6px; }
+
+        .btn-generate {
+            width:100%; padding:14px; border:none; border-radius:12px;
+            background: linear-gradient(135deg, var(--accent), #5a4bd1);
+            color:#fff; font-size:1rem; font-weight:700; cursor:pointer;
+            letter-spacing:0.4px; transition:0.25s; box-shadow:0 10px 28px rgba(108,92,231,0.4);
+            display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:14px;
+        }
+        .btn-generate:hover { background: linear-gradient(135deg, var(--accent-hover), #6b5ce7); transform:translateY(-2px); }
+        .btn-generate:disabled { background:#444; box-shadow:none; cursor:not-allowed; transform:none; opacity:0.5; }
+
+        .footer {
+            text-align:center; font-size:0.75rem; color:var(--text-secondary);
+            border-top:1px solid var(--card-border); padding-top:14px; margin-top:4px;
+        }
+        .footer .heart { color:#e056a0; margin:0 3px; }
+
+        /* Modale About */
+        .modal-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background: var(--modal-overlay); z-index:200;
+            display:flex; align-items:center; justify-content:center;
+            opacity:0; visibility:hidden; transition:0.3s;
+        }
+        .modal-overlay.active { opacity:1; visibility:visible; }
+        .modal-content {
+            background: var(--card-bg); backdrop-filter: blur(40px);
+            border-radius:20px; padding:30px; max-width:420px; width:90%;
+            box-shadow:0 30px 70px rgba(0,0,0,0.6); color:var(--text);
+            border:1px solid var(--card-border);
+        }
+        .modal-content h2 { margin-bottom:12px; font-size:1.5rem; }
+        .modal-content p { margin-bottom:14px; line-height:1.5; color:var(--text-secondary); }
+        .modal-content a { color:var(--accent); text-decoration:underline; }
+        .modal-close {
+            background: var(--accent); border:none; color:#fff; padding:8px 20px;
+            border-radius:8px; cursor:pointer; font-weight:600; margin-top:8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="header-left">
+                    <div class="header-icon">🔐</div>
+                    <div>
+                        <h1>EasyPass</h1>
+                        <p>Password robuste e personalizzate</p>
+                    </div>
+                </div>
+                <button class="burger-btn" id="burgerBtn" aria-label="Menu">☰</button>
+            </div>
+
+            <!-- Burger Menu -->
+            <div class="burger-menu" id="burgerMenu">
+                <div class="menu-item" id="menuThemeCandy">🍬 Tema Candy</div>
+                <div class="menu-item" id="menuThemeDark">🌙 Tema Dark</div>
+                <div class="menu-item" id="menuThemeLight">☀️ Tema Light</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" id="menuAbout">ℹ️ About</div>
+                <a class="menu-item" href="https://www.sputlab.com/tags/software/" target="_blank" rel="noopener">🔗 Altre WebApp</a>
+                <a class="menu-item" href="https://paypal.me/sputnikov" target="_blank" rel="noopener">❤️ Supporta lo sviluppo</a>
+            </div>
+
+            <!-- Corpo principale -->
+            <div class="password-section">
+                <div class="password-display" id="passwordDisplayWrapper">
+                    <div class="password-text placeholder" id="passwordText">La tua password apparirà qui</div>
+                    <button class="btn-copy" id="btnCopy" disabled>📋<span class="tooltip-copy">Copiato!</span></button>
+                </div>
+                <div class="strength-section">
+                    <div class="strength-bar-container"><div class="strength-bar-fill" id="strengthBarFill"></div></div>
+                    <span class="strength-label" id="strengthLabel">—</span>
+                </div>
+            </div>
+
+            <div class="length-section">
+                <div class="length-header">
+                    <label>Lunghezza totale</label>
+                    <span class="length-value" id="lengthValueDisplay">16</span>
+                </div>
+                <input type="range" class="range-slider" id="totalLength" min="4" max="64" value="16" step="1">
+            </div>
+
+            <div class="toggles-section" id="togglesContainer">
+                <!-- generate via JS per pulizia, ma possiamo lasciare statico -->
+            </div>
+
+            <div class="summary-row"><span id="summaryText">Caratteri casuali extra: 4</span><span class="remaining ok" id="remainingIndicator">✓</span></div>
+            <div class="error-msg" id="errorMsg"></div>
+            <button class="btn-generate" id="btnGenerate">⚡ Genera Password</button>
+            <div class="footer">EasyPass v1.0 • Made with <span class="heart">❤️</span> by sputlab.com</div>
+        </div>
+    </div>
+
+    <!-- Modale About -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-content">
+            <h2>🔐 EasyPass</h2>
+            <p>Generatore di password sicure completamente personalizzabile. Scegli la lunghezza, i tipi di caratteri e la quantità esatta di ciascun set. La barra di complessità valuta la robustezza in tempo reale.</p>
+            <p>I caratteri nella password sono colorati in base alla categoria (minuscole, maiuscole, numeri, simboli) per una lettura immediata.</p>
+            <p>Se trovi utile questa app, considera una donazione o scopri altre webapp sul nostro sito.</p>
+            <a href="https://paypal.me/sputnikov" target="_blank">💖 Supporta su PayPal</a><br>
+            <a href="https://www.sputlab.com/tags/software/" target="_blank">🌐 Altre WebApp su sputlab.com</a><br><br>
+            <button class="modal-close" id="closeAboutModal">Chiudi</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- Tema ---
+            const body = document.body;
+            const themeKey = 'easypass_theme';
+            function setTheme(theme) {
+                body.classList.remove('theme-light', 'theme-dark');
+                if (theme === 'light') body.classList.add('theme-light');
+                else if (theme === 'dark') body.classList.add('theme-dark');
+                localStorage.setItem(themeKey, theme);
+            }
+            function getSavedTheme() { return localStorage.getItem(themeKey) || 'candy'; }
+            setTheme(getSavedTheme());
+
+            // --- Elementi DOM ---
+            const burgerBtn = document.getElementById('burgerBtn');
+            const burgerMenu = document.getElementById('burgerMenu');
+            const aboutModal = document.getElementById('aboutModal');
+            const closeAboutModal = document.getElementById('closeAboutModal');
+            const passwordText = document.getElementById('passwordText');
+            const btnCopy = document.getElementById('btnCopy');
+            const btnGenerate = document.getElementById('btnGenerate');
+            const totalLengthSlider = document.getElementById('totalLength');
+            const lengthValueDisplay = document.getElementById('lengthValueDisplay');
+            const strengthBarFill = document.getElementById('strengthBarFill');
+            const strengthLabel = document.getElementById('strengthLabel');
+            const errorMsg = document.getElementById('errorMsg');
+            const summaryText = document.getElementById('summaryText');
+            const remainingIndicator = document.getElementById('remainingIndicator');
+            const togglesContainer = document.getElementById('togglesContainer');
+
+            // Costruisci dinamicamente toggle rows per mantenerli referenziati
+            const toggleConfigs = [
+                { id: 'lower', label: 'Minuscole (a-z)', chars: 'abcdefghijklmnopqrstuvwxyz', defaultChecked: true, defaultCount: 4 },
+                { id: 'upper', label: 'Maiuscole (A-Z)', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', defaultChecked: true, defaultCount: 3 },
+                { id: 'digit', label: 'Numeri (0-9)', chars: '0123456789', defaultChecked: true, defaultCount: 3 },
+                { id: 'special', label: 'Speciali (!@#$...)', chars: '!@#$%^&*()_+-=[]{}|;:,.<>?/~', defaultChecked: true, defaultCount: 2 }
+            ];
+
+            let currentPassword = '';
+            const elementRefs = {};
+
+            function createToggleRows() {
+                togglesContainer.innerHTML = '';
+                toggleConfigs.forEach(c => {
+                    const row = document.createElement('div');
+                    row.className = 'toggle-row';
+                    row.id = `row-${c.id}`;
+                    row.innerHTML = `
+                        <span class="icon-indicator ${c.id}"></span>
+                        <span class="toggle-label-text">${c.label}</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-${c.id}" ${c.defaultChecked ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <input type="number" class="mini-number-input" id="count-${c.id}" value="${c.defaultCount}" min="0" max="64">
+                    `;
+                    togglesContainer.appendChild(row);
+                    const toggle = row.querySelector(`#toggle-${c.id}`);
+                    const count = row.querySelector(`#count-${c.id}`);
+                    elementRefs[c.id] = { toggle, count, row, chars: c.chars, name: c.label.split(' ')[0] };
+                });
+            }
+            createToggleRows();
+
+            function getActiveConfigs() {
+                return Object.values(elementRefs).filter(c => c.toggle.checked);
+            }
+            function getTotalMinRequired() {
+                return Object.values(elementRefs).reduce((sum, c) => sum + (c.toggle.checked ? Math.max(0, parseInt(c.count.value)||0) : 0), 0);
+            }
+            function getTotalLength() { return parseInt(totalLengthSlider.value) || 16; }
+            function validateConfig() {
+                const active = getActiveConfigs();
+                if (active.length === 0) return { valid: false, msg: 'Seleziona almeno un tipo di carattere.' };
+                const totalLen = getTotalLength();
+                const totalMin = getTotalMinRequired();
+                if (totalMin > totalLen) return { valid: false, msg: `Somma minima (${totalMin}) > lunghezza totale (${totalLen}).` };
+                return { valid: true, msg: '' };
+            }
+
+            function updateUIState() {
+                const totalLen = getTotalLength();
+                const totalMin = getTotalMinRequired();
+                const remaining = totalLen - totalMin;
+                const validation = validateConfig();
+                lengthValueDisplay.textContent = totalLen;
+
+                Object.values(elementRefs).forEach(c => {
+                    c.count.disabled = !c.toggle.checked;
+                    if (!c.toggle.checked) { c.count.value = 0; c.row.classList.add('disabled-row'); }
+                    else { c.row.classList.remove('disabled-row'); if ((parseInt(c.count.value)||0)===0) c.count.value=1; }
+                    let val = parseInt(c.count.value)||0;
+                    val = Math.max(0, Math.min(val, totalLen));
+                    c.count.value = val;
+                });
+
+                const active = getActiveConfigs();
+                if (active.length===0) {
+                    summaryText.textContent='Nessun tipo selezionato'; remainingIndicator.textContent='✗'; remainingIndicator.className='remaining error';
+                } else if (remaining<0) {
+                    summaryText.textContent=`Eccesso di ${Math.abs(remaining)} caratteri!`; remainingIndicator.textContent='✗'; remainingIndicator.className='remaining error';
+                } else if (remaining===0) {
+                    summaryText.textContent='Nessun carattere casuale extra'; remainingIndicator.textContent='✓'; remainingIndicator.className='remaining ok';
+                } else {
+                    summaryText.textContent=`Caratteri casuali extra: ${remaining}`; remainingIndicator.textContent='✓'; remainingIndicator.className='remaining ok';
+                }
+                errorMsg.textContent = validation.valid ? '' : validation.msg;
+                btnGenerate.disabled = !validation.valid;
+            }
+
+            function shuffle(arr) { for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+            function randomChar(charset) { return charset[Math.floor(Math.random()*charset.length)]; }
+            function getCharClass(ch) {
+                if (/[a-z]/.test(ch)) return 'char-lower';
+                if (/[A-Z]/.test(ch)) return 'char-upper';
+                if (/[0-9]/.test(ch)) return 'char-digit';
+                return 'char-special';
+            }
+            function colorizePassword(pw) {
+                return pw.split('').map(ch => `<span class="${getCharClass(ch)}">${ch}</span>`).join('');
+            }
+
+            function generatePassword() {
+                const validation = validateConfig();
+                if (!validation.valid) return null;
+                const totalLen = getTotalLength();
+                const active = getActiveConfigs();
+                const remainingSlots = totalLen - getTotalMinRequired();
+                let chars = [];
+                active.forEach(c => { const n=parseInt(c.count.value)||0; for(let i=0;i<n;i++) chars.push(randomChar(c.chars)); });
+                const combined = active.map(c=>c.chars).join('');
+                for(let i=0;i<remainingSlots;i++) chars.push(randomChar(combined));
+                return shuffle(shuffle(chars)).join('');
+            }
+
+            function displayPassword(pw) {
+                currentPassword = pw;
+                passwordText.innerHTML = colorizePassword(pw);
+                passwordText.classList.remove('placeholder');
+                btnCopy.disabled = false;
+                updateStrength(pw);
+            }
+            function clearPassword() {
+                currentPassword = '';
+                passwordText.textContent = 'La tua password apparirà qui';
+                passwordText.classList.add('placeholder');
+                btnCopy.disabled = true;
+                btnCopy.classList.remove('copied');
+                btnCopy.innerHTML = '📋<span class="tooltip-copy">Copiato!</span>';
+                strengthBarFill.style.width='0%'; strengthBarFill.style.backgroundColor='#555';
+                strengthLabel.textContent='—'; strengthLabel.className='strength-label';
+            }
+            function updateStrength(pw) {
+                if(!pw) { clearPassword(); return; }
+                const len=pw.length, types=[/[a-z]/,/[A-Z]/,/\d/,/[^a-zA-Z0-9]/].filter(r=>r.test(pw)).length;
+                let score=Math.min(len/20,1)*50 + (types/4)*50 + (len>=16&&types===4?15:0)+(len>=20&&types===4?5:0);
+                score=Math.min(score,100);
+                let level,color,label;
+                if(score<30){level='weak';color='#e74c3c';label='Debole';}
+                else if(score<55){level='medium';color='#f39c12';label='Media';}
+                else if(score<80){level='strong';color='#2ecc71';label='Forte';}
+                else{level='very-strong';color='#00e676';label='Molto forte';}
+                strengthBarFill.style.width=score+'%'; strengthBarFill.style.backgroundColor=color;
+                strengthLabel.textContent=label; strengthLabel.className='strength-label level-'+level;
+            }
+
+            function handleGenerate() {
+                updateUIState();
+                if(!validateConfig().valid) { clearPassword(); return; }
+                const pw = generatePassword();
+                if(pw) displayPassword(pw);
+            }
+
+            async function handleCopy() {
+                if(!currentPassword) return;
+                try {
+                    await navigator.clipboard.writeText(currentPassword);
+                    btnCopy.classList.add('copied'); btnCopy.innerHTML='✅<span class="tooltip-copy">Copiato!</span>';
+                    setTimeout(()=>{ btnCopy.classList.remove('copied'); btnCopy.innerHTML='📋<span class="tooltip-copy">Copiato!</span>'; },2000);
+                } catch(e) {
+                    const ta=document.createElement('textarea'); ta.value=currentPassword; ta.style.position='fixed';ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
+                    try{ document.execCommand('copy'); btnCopy.classList.add('copied'); btnCopy.innerHTML='✅<span class="tooltip-copy">Copiato!</span>'; setTimeout(()=>{ btnCopy.classList.remove('copied'); btnCopy.innerHTML='📋<span class="tooltip-copy">Copiato!</span>'; },2000); }catch(ex){ alert('Copia manuale necessaria.'); }
+                    document.body.removeChild(ta);
+                }
+            }
+
+            // Event listeners
+            totalLengthSlider.addEventListener('input', ()=>{ updateUIState(); if(currentPassword && validateConfig().valid) displayPassword(generatePassword()||currentPassword); else if(!validateConfig().valid) clearPassword(); });
+            Object.values(elementRefs).forEach(c => {
+                c.toggle.addEventListener('change', ()=>{ updateUIState(); if(currentPassword && validateConfig().valid) displayPassword(generatePassword()||currentPassword); else if(!validateConfig().valid) clearPassword(); });
+                c.count.addEventListener('input', ()=>{
+                    let v=parseInt(c.count.value); if(isNaN(v)||v<0) c.count.value=0;
+                    v=parseInt(c.count.value); if(v>getTotalLength()) c.count.value=getTotalLength();
+                    updateUIState(); if(currentPassword && validateConfig().valid) displayPassword(generatePassword()||currentPassword); else if(!validateConfig().valid) clearPassword();
+                });
+                c.count.addEventListener('blur', ()=>{ if(c.count.value===''||parseInt(c.count.value)<0) c.count.value=c.toggle.checked?1:0; updateUIState(); });
+            });
+            btnGenerate.addEventListener('click', handleGenerate);
+            btnCopy.addEventListener('click', handleCopy);
+            passwordText.addEventListener('click', ()=>{
+                if(currentPassword){ const r=document.createRange(); r.selectNodeContents(passwordText); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+            });
+
+            // Burger menu
+            burgerBtn.addEventListener('click', (e)=>{ e.stopPropagation(); burgerMenu.classList.toggle('active'); });
+            document.addEventListener('click', (e)=>{ if(!burgerMenu.contains(e.target) && e.target!==burgerBtn) burgerMenu.classList.remove('active'); });
+            document.getElementById('menuThemeCandy').addEventListener('click', ()=>{ setTheme('candy'); burgerMenu.classList.remove('active'); });
+            document.getElementById('menuThemeDark').addEventListener('click', ()=>{ setTheme('dark'); burgerMenu.classList.remove('active'); });
+            document.getElementById('menuThemeLight').addEventListener('click', ()=>{ setTheme('light'); burgerMenu.classList.remove('active'); });
+            document.getElementById('menuAbout').addEventListener('click', ()=>{ aboutModal.classList.add('active'); burgerMenu.classList.remove('active'); });
+            closeAboutModal.addEventListener('click', ()=>{ aboutModal.classList.remove('active'); });
+            aboutModal.addEventListener('click', (e)=>{ if(e.target===aboutModal) aboutModal.classList.remove('active'); });
+
+            // Inizializzazione
+            updateUIState();
+            const initPw = generatePassword();
+            if(initPw) displayPassword(initPw);
+        })();
+    </script>
+</body>
+</html>
