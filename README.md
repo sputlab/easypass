@@ -1,51 +1,75 @@
-# EasyPass 🔐
+<div align="center">
+  <img src="assets/icon-192.png" alt="EasyPass App Icon" width="128" height="128" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(37,99,235,0.35);" />
+  <h1>EasyPass</h1>
+  <p><strong>Next-Generation Cryptographically Secure Password & Passphrase Generator PWA</strong></p>
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-purple.svg)](manifest.json)
-[![Security: Web Crypto](https://img.shields.io/badge/Security-Web%20Crypto%20API-success.svg)](#security--cryptography)
-[![Dependencies: 0](https://img.shields.io/badge/Dependencies-0-brightgreen.svg)](#technology-stack)
+  <p>
+    <a href="https://github.com/"><img src="https://img.shields.io/badge/version-2.1.0-blue.svg" alt="Version 2.1.0" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT" /></a>
+    <a href="manifest.json"><img src="https://img.shields.io/badge/PWA-Installable-purple.svg" alt="PWA Installable" /></a>
+    <a href="#-cryptography--security"><img src="https://img.shields.io/badge/Security-Web%20Crypto%20API-success.svg" alt="Security: Web Crypto API" /></a>
+    <a href="#-technology-stack"><img src="https://img.shields.io/badge/Dependencies-0-brightgreen.svg" alt="Dependencies: 0" /></a>
+  </p>
+</div>
 
-> **EasyPass** is a modern, fast, privacy-focused Password & Passphrase Generator built as a standalone, offline-first Progressive Web App (PWA).
+---
 
-Developed with privacy and security as top priorities: **100% client-side execution, zero external network dependencies, zero telemetry, and zero tracking**.
+## 📖 About EasyPass
+
+**EasyPass** is a modern, privacy-first, client-side password and passphrase generation suite built as an installable **Progressive Web App (PWA)**. It provides enterprise-grade cryptographic security in an elegant, glassmorphic user interface that runs entirely inside your browser—both online and **100% offline**.
+
+### Why EasyPass?
+Most online password generators send requests across the network, run analytics scripts, or rely on outdated, biased pseudo-random algorithms (`Math.random()`). 
+
+EasyPass was engineered from the ground up with the following core principles:
+1. **Zero Network Footprint**: No servers, no tracking, no Google Analytics, no third-party CDNs. Every single byte of cryptographic material is generated directly in browser memory and stays on your machine.
+2. **True Cryptographic Randomness**: Powered by the native Web Crypto API (`window.crypto.getRandomValues()`) paired with rejection sampling to eliminate modulo bias.
+3. **Dual Generation Paradigms**: Instant toggle between high-entropy character-based passwords and human-memorable dictionary passphrases.
+4. **Install Anywhere as a PWA**: Works natively as a desktop or mobile application on macOS, iOS, Android, Windows, and Linux.
 
 ---
 
 ## 🌟 Key Features
 
-### 🔑 Dual Generation Modes
-- **Classic Password Generator**:
+### 🔑 Dual Generation Engines
+- **Classic Complex Password**:
   - Configurable length (4 to 64 characters).
-  - Fine-grained control over character classes (lowercase, uppercase, numbers, special symbols).
-  - Guaranteed minimum counts per selected character set.
-  - Extra random characters automatically filled.
-- **Memorable Passphrase Generator**:
-  - Generates human-friendly, memorable passphrases using dictionary words.
-  - Configurable word count (3 to 10 words).
-  - Customizable separators (hyphens `-`, underscores `_`, dots `.`, spaces, slashes `/`).
-  - Options for word capitalization and appending numeric digits.
+  - Multi-class character selection: Lowercase (`a-z`), Uppercase (`A-Z`), Numbers (`0-9`), and Symbols (`!@#$%...`).
+  - Guaranteed minimum character counts per active category with random fill.
+- **Memorable Diceware Passphrase**:
+  - Generates memorable, high-entropy phrases from bilingual curated dictionaries (256 words each, power-of-two uniform entropy).
+  - Configurable phrase length (3 to 10 words).
+  - Choice of separators: hyphens (`-`), underscores (`_`), dots (`.`), colons (`:`), semicolons (`;`), commas (`,`), or spaces.
+  - Optional title-casing and automatic numeric digit appending.
 
-### 🛡️ Security & Cryptography
-- **Native Web Crypto API**: Uses `crypto.getRandomValues()` with cryptographic rejection sampling (`getSecureRandomInt`) for true zero-modulo-bias pseudo-random generation (CSPRNG).
-- **Accurate Entropy Calculation**: Real-time entropy computation based on character set pool size for passwords and dictionary power-of-two size for passphrases ($~8$ bits/word).
-- **Content Security Policy (CSP)**: Built-in strict CSP meta policy preventing cross-site scripting and external network leakage.
-- **Encrypted Local History**: Stores recent passwords in `localStorage` encrypted with PBKDF2 derivation and confirmation prompt before deletion.
-- **Ninja Mode (Privacy)**: Mask passwords on screen (`-webkit-text-security: disc`) to prevent shoulder-surfing in public environments.
-- **Zero Third-Party CDNs**: No external fonts, no external scripts, and no analytics calls.
+### 🛡️ Cryptography & Security
+- **Web Crypto API & Zero Modulo Bias**: Uses rejection sampling algorithm (`getSecureRandomInt`) to ensure every character or dictionary index has an identical mathematical probability of being selected.
+- **Accurate Real-Time Entropy**: Displays real-time entropy calculation in bits ($H = L \cdot \log_2(N)$) alongside an intuitive complexity bar.
+- **Strict Content Security Policy (CSP)**: Built-in meta CSP blocks all unauthorized external scripts, inline injection, and network connections.
+- **Ninja Privacy Mode**: An instant toggle (`-webkit-text-security: disc`) that masks passwords on screen to prevent shoulder-surfing in public environments.
+- **Encrypted Local History**: Saves your last 10 generated passwords locally using PBKDF2/AES encryption, complete with confirmation dialogs for zero accidental data loss.
 
-### ⚙️ Advanced Customization & Usability
-- **Ambiguous Character Filter**: Exclude confusing characters like `0/O`, `1/l/I`, `8/B`.
+### ⚙️ Usability & Customization
+- **Ambiguous Character Filter**: Exclude visually confusing glyphs (`0/O`, `1/l/I`, `8/B`).
 - **Consecutive Character Filter**: Prevent repeated identical characters from appearing adjacently.
-- **Custom Character Exclusions**: Specify exact characters to exclude based on your company's password policy.
-- **Bilingual Interface**: Seamless instant toggle between Italian (**IT**) and English (**EN**) with synchronized separator labels and HTML language tags.
-- **Dark / Light Theme**: Automatic OS preference detection (`prefers-color-scheme`) with manual toggle and OLED-friendly dark palette.
-- **Haptic & Audio Feedback**: Tactile vibration and clean synthesizer tone using a cached, leak-free AudioContext.
-- **Accessible & Responsive**: Keyboard shortcuts (`G` to regenerate, `Escape` to close modals, click/Enter on password box to copy), visible focus rings, ARIA live announcement, and safe area insets for iOS notches and dynamic islands.
+- **Custom Exclusion Set**: Blacklist characters prohibited by specific corporate or legacy IT password policies.
+- **Multilingual Support**: Real-time toggle between Italian (**IT**) and English (**EN**).
+- **Adaptive Dark / Light Themes**: Matches system `prefers-color-scheme` with manual override and OLED-black styling.
+- **Haptic & Auditory Feedback**: Tactile vibration on mobile and zero-leak synthesized audio click via Web Audio API.
+- **Accessible & Ergonomic**: Full keyboard navigation (press `G` to regenerate, `Esc` to dismiss dialogs), visible focus rings, ARIA roles, and iOS safe area padding.
 
-### 📱 Progressive Web App (PWA)
-- Fully installable on iOS (Safari Add to Home Screen), Android (Chrome PWA prompt), macOS, Windows, and Linux.
-- **Service Worker Offline Cache**: Built-in `sw.js` Cache-First service worker enabling 100% offline functionality.
+---
+
+## 📱 Progressive Web App (PWA)
+
+EasyPass is a certified Progressive Web App that works seamlessly offline and can be installed directly onto your device:
+
+- **iOS / iPadOS**: Open Safari, tap the **Share** button, and choose **Add to Home Screen**.
+- **Android**: Open Chrome, tap the **three dots menu**, and choose **Install app** or **Add to Home Screen**.
+- **macOS / Windows / Linux**: In Google Chrome, Microsoft Edge, or Brave, click the **Install icon** in the browser address bar.
+
+### Service Worker Caching
+The application includes a Cache-First Service Worker (`sw.js`) that automatically pre-caches all essential static assets (`index.html`, `manifest.json`, and the `assets/` suite), ensuring instantaneous startup and uninterrupted offline usability.
 
 ---
 
@@ -55,114 +79,95 @@ Developed with privacy and security as top priorities: **100% client-side execut
 EasyPass/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml        # Automated GitHub Pages deployment
-├── archive/                  # Historical release snapshots (v1.0 to v2.0.0)
-│   ├── easypass_v1.html
-│   ├── ...
-│   ├── easypass_v197.html
-│   └── easypass_v2.0.0.html
-├── favicon/                  # Favicon icons across multiple resolutions
-│   ├── apple-touch-icon.png
-│   ├── favicon-16x16.png
-│   ├── favicon-32x32.png
-│   ├── favicon-48x48.png
-│   └── favicon.ico
-├── graphics/                 # Source design assets (SVG vector icons, branding)
-│   ├── AppAssets_2026-05-03/ # App assets for iOS, Android, and Web
-│   ├── easypass-app-icon...svg
-│   └── logo.png
-├── icons/                    # PWA launcher icons (48x48 to 512x512)
-│   ├── icon-192x192.png
-│   ├── icon-512x512.png
-│   └── ...
-├── .gitignore                # Git ignore rules for OS and temp files
-├── index.html                # Main application entry point (EasyPass v2.0.0)
-├── LICENSE                   # MIT License
-├── logo.png                  # EasyPass primary logo
-├── manifest.json             # PWA Web App Manifest
-├── README.md                 # Project documentation
-└── sw.js                     # Offline Service Worker (PWA Cache-First)
+│       └── deploy.yml        # Automated GitHub Pages CI/CD deployment
+├── assets/                   # Consolidated modern PWA & web brand assets
+│   ├── apple-touch-icon.png  # Apple iOS touch icon (180x180)
+│   ├── favicon-16.png        # Standard web favicon (16x16)
+│   ├── favicon-32.png        # Standard web favicon (32x32)
+│   ├── favicon.ico           # Multi-resolution favicon fallback
+│   ├── icon-192.png          # PWA standard launcher icon (192x192)
+│   ├── icon-512.png          # PWA high-res launcher icon (512x512)
+│   ├── icon-maskable.png     # Android adaptive / maskable icon (512x512)
+│   └── icon.svg              # Scalable vector brand icon
+├── .gitignore                # Git exclusions (local caches, OS files, legacy folders)
+├── favicon.ico               # Root favicon shortcut
+├── index.html                # Single-file standalone PWA application
+├── LICENSE                   # MIT Open Source License
+├── logo.png                  # High-resolution primary brand logo
+├── manifest.json             # W3C Web App Manifest
+├── README.md                 # Project documentation & architecture
+└── sw.js                     # Offline Service Worker (PWA Cache-First engine)
 ```
+
+> [!NOTE]
+> Legacy working folders (`archive/`, `favicon/`, `graphics/`, `icons/`) have been archived and added to `.gitignore` to keep the public repository lightweight and streamlined.
 
 ---
 
 ## 🚀 Quick Start & Local Development
 
-Because EasyPass is a self-contained, zero-dependency web application, there are no build steps, compilers, or package managers required.
+Because EasyPass is a self-contained, dependency-free web application, no compilers, bundlers, or package managers are required.
 
-### Option 1: Direct File
-Simply open `index.html` in your favorite web browser:
+### Run Directly
+Open `index.html` in any modern web browser:
 ```bash
 open index.html        # macOS
 xdg-open index.html    # Linux
 start index.html       # Windows
 ```
 
-### Option 2: Local HTTP Server
-To test PWA features and Service Worker / Web App Manifest locally:
-
+### Run via Local Web Server
+To test PWA service workers and manifest registration locally over HTTP:
 ```bash
 # Using Python 3
 python3 -m http.server 8000
 
-# Or using Node.js / npx
+# Or using Node.js
 npx serve .
 ```
-
-Then navigate to `http://localhost:8000` in your browser.
+Then visit `http://localhost:8000`.
 
 ---
 
 ## 🌐 Deploying to GitHub Pages
 
-EasyPass is ready for 1-click deployment on GitHub Pages:
-
-### Method A: Automated GitHub Actions (Recommended)
-1. Push this repository to GitHub.
-2. In your repository on GitHub, navigate to **Settings** > **Pages**.
-3. Under **Build and deployment** > **Source**, select **GitHub Actions**.
-4. The included `.github/workflows/deploy.yml` workflow will automatically deploy the site whenever you push to `main`.
-
-### Method B: Classic Branch Deployment
-1. Go to **Settings** > **Pages**.
-2. Under **Build and deployment** > **Source**, choose **Deploy from a branch**.
-3. Under **Branch**, select `main` and folder `/ (root)`.
-4. Click **Save**. Your site will be live within seconds!
+### Automated GitHub Actions (Recommended)
+1. Push this repository to GitHub on the `main` branch.
+2. Go to **Settings** > **Pages** in your GitHub repository.
+3. Under **Build and deployment** > **Source**, choose **GitHub Actions**.
+4. The workflow in `.github/workflows/deploy.yml` will automatically deploy your PWA.
 
 ---
 
 ## 📜 Changelog
 
-- **v2.0.0** (Latest)
-  - Upgraded random generation to native Web Crypto API (`crypto.getRandomValues()`).
-  - Added full multi-language support (Italian & English).
-  - Improved accessibility (expanded interactive hitboxes, ARIA roles/labels).
-  - Enhanced layout, modal animations, and bug fixes.
-- **v1.97**
-  - Added PWA Web App Manifest and complete multi-resolution icon set.
-- **v1.96**
-  - Passphrase layout alignment, white indicators, inverted changelog order.
-- **v1.95**
-  - Mobile modal navigation optimization, Ninja privacy mode, Settings modal.
-- **v1.9**
-  - Local history security hardening with HTML entity escaping, new word separators.
-- **v1.0**
-  - Initial public release of classic password generator.
+- **v2.1.0** (Current)
+  - Consolidated brand identity with new glowing digital shield icon.
+  - Streamlined `assets/` directory with standardized PWA launcher, maskable, and favicon icons.
+  - Cleaned repository structure and excluded legacy directories via `.gitignore`.
+  - Expanded comprehensive **About EasyPass** modal and documentation.
+- **v2.0.0**
+  - Migrated PRNG to native Web Crypto API (`crypto.getRandomValues`) with zero-modulo-bias rejection sampling.
+  - Added full bilingual support (Italian & English) with synchronized UI and dictionaries.
+  - Upgraded accessibility, interactive touch targets, and ARIA live regions.
+  - Implemented client-side encrypted password history and Ninja privacy mode.
+- **v1.97 - v1.0**
+  - Historical incremental releases (passphrase mode, dark/light themes, offline manifest).
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **HTML5 & CSS3**: Modern CSS variables, glassmorphism UI, flexible grid & flexbox layouts.
-- **Vanilla JavaScript (ES6+)**: Zero external frameworks, libraries, or dependencies.
-- **Web Crypto API**: High-entropy cryptographic pseudo-random number generation.
-- **Web App Manifest**: Full compliance with Progressive Web App standards.
+- **HTML5 & CSS3**: Responsive CSS variables, glassmorphic layout, safe-area support.
+- **Vanilla JavaScript (ES6+)**: Zero runtime dependencies, 100% auditable client-side code.
+- **Web Crypto API**: Cryptographic pseudo-random number generation (`crypto.getRandomValues`).
+- **Web App Manifest & Service Worker**: Modern offline-first PWA architecture.
 
 ---
 
 ## 📄 License
 
-This project is open-source and licensed under the [MIT License](LICENSE).
+Distributed under the [MIT License](LICENSE). Free for personal and commercial use.
 
 ---
 

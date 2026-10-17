@@ -25,6 +25,12 @@ Thumbs.db
 *.bak
 *.orig
 
+# Local legacy and archive directories (excluded from remote repo)
+archive/
+graphics/
+favicon/
+icons/
+
 # Environment & Local Secrets
 .env
 .env.local
